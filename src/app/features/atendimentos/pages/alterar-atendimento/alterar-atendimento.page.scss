@@ -1,0 +1,44 @@
+@use '../../../agendamentos/pages/alterar-agendamento/alterar-agendamento.page';
+
+.files-description {
+  margin: -0.45rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.conclusion-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3rem;
+  margin-bottom: 0.85rem;
+  border: 0;
+  border-radius: 0.8rem;
+  color: #fff;
+  background: linear-gradient(135deg, #132b67, #263785);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  ion-icon {
+    color: #78e4da;
+    font-size: 1.15rem;
+  }
+}
+
+.conclusion-dialog p {
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.confirm-dialog button.confirm-conclusion {
+  color: #fff;
+  background: #078683;
+}

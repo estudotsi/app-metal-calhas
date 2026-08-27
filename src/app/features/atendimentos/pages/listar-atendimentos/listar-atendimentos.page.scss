@@ -1,0 +1,13 @@
+@use '../../../agendamentos/pages/listar-agendamentos/listar-agendamentos.page.scss';
+
+.return-label {
+  display: inline-flex;
+  margin: 0 0 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  color: #a54615;
+  background: #fff0e7;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}

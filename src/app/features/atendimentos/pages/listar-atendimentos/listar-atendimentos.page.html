@@ -1,0 +1,575 @@
+<ion-header class="app-header">
+  <ion-toolbar>
+    <div class="toolbar-content">
+      <div class="identity">
+        <img src="assets/logo.png" alt="Metal Telhas" />
+        <div>
+          <span>Meus atendimentos</span>
+          <strong>{{ user()?.nome }}</strong>
+        </div>
+      </div>
+      <ion-button fill="clear" class="logout-button" (click)="sair()">Sair</ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="appointments-content">
+  <ion-refresher slot="fixed" (ionRefresh)="atualizar($event)">
+    <ion-refresher-content pullingText="Puxe para atualizar" refreshingSpinner="crescent" />
+  </ion-refresher>
+
+  @if (enviandoFotoId() !== null) {
+    <section slot="fixed" class="video-upload-panel" role="status" aria-live="polite">
+      <div class="video-upload-heading">
+        <ion-spinner name="crescent" />
+        <div>
+          <strong>Enviando foto do atendimento</strong>
+          <span>
+            {{ progressoFoto() > 0 ? progressoFoto() + '% enviado' : 'Preparando o envio...' }}
+          </span>
+        </div>
+        <b>{{ progressoFoto() }}%</b>
+      </div>
+      <div class="video-upload-track" aria-hidden="true">
+        <span [style.width.%]="progressoFoto()"></span>
+      </div>
+      <small>Mantenha o aplicativo aberto até terminar.</small>
+    </section>
+  } @else if (enviandoVideoId() !== null) {
+    <section slot="fixed" class="video-upload-panel" role="status" aria-live="polite">
+      <div class="video-upload-heading">
+        <ion-spinner name="crescent" />
+        <div>
+          <strong>Enviando vídeo do atendimento</strong>
+          <span>
+            {{ progressoVideo() > 0 ? progressoVideo() + '% enviado' : 'Preparando o envio...' }}
+          </span>
+        </div>
+        <b>{{ progressoVideo() }}%</b>
+      </div>
+      <div class="video-upload-track" aria-hidden="true">
+        <span [style.width.%]="progressoVideo()"></span>
+      </div>
+      <small>Mantenha o aplicativo aberto até terminar.</small>
+    </section>
+  }
+
+  <main>
+    <section class="page-intro">
+      <div>
+        <p>Agenda do montador</p>
+        <h1>
+          {{ situacao() === 'nao-concluidos' ? 'Próximos serviços' : 'Serviços concluídos' }}
+        </h1>
+      </div>
+      <div class="intro-actions">
+        <button
+          type="button"
+          class="refresh-button"
+          [disabled]="carregando()"
+          aria-label="Atualizar atendimentos"
+          (click)="carregar()"
+        >
+          @if (carregando()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <span aria-hidden="true">&#8635;</span>
+          }
+          Atualizar
+        </button>
+        <span class="total-badge">{{ pagina().total }}</span>
+      </div>
+    </section>
+
+    <nav class="status-tabs" aria-label="Situação dos atendimentos">
+      <button
+        type="button"
+        [class.active]="situacao() === 'nao-concluidos'"
+        (click)="alterarSituacao('nao-concluidos')"
+      >
+        Não concluídos
+      </button>
+      <button
+        type="button"
+        [class.active]="situacao() === 'concluidos'"
+        (click)="alterarSituacao('concluidos')"
+      >
+        Concluídos
+      </button>
+    </nav>
+
+    <div class="date-filter">
+      <div>
+        <span>Data dos atendimentos</span>
+        <small>Escolha o dia da agenda</small>
+      </div>
+
+      <div class="date-actions">
+        @if (dataAgendamento()) {
+          <button type="button" class="clear-date" (click)="limparData()">Limpar</button>
+        }
+        <ion-datetime-button datetime="data-atendimentos" />
+      </div>
+      <ion-modal class="date-modal" [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime
+            id="data-atendimentos"
+            presentation="date"
+            locale="pt-BR"
+            [firstDayOfWeek]="0"
+            [showDefaultButtons]="true"
+            [showClearButton]="true"
+            doneText="Confirmar"
+            cancelText="Cancelar"
+            clearText="Limpar"
+            [value]="dataAgendamento() || undefined"
+            (ionChange)="alterarData($event)"
+          />
+        </ng-template>
+      </ion-modal>
+    </div>
+
+    <div class="sort-filter">
+      <span>Ordenar por horário</span>
+      <button type="button" [disabled]="carregando()" (click)="alternarDirecaoHora()">
+        @if (direcaoHora() === 'asc') {
+          Mais cedo primeiro <strong aria-hidden="true">&uarr;</strong>
+        } @else {
+          Mais tarde primeiro <strong aria-hidden="true">&darr;</strong>
+        }
+      </button>
+    </div>
+
+    @if (carregando()) {
+      <div class="state-message">
+        <ion-spinner name="crescent" />
+        <span>Carregando atendimentos...</span>
+      </div>
+    } @else if (erro()) {
+      <div class="state-message error-state">
+        <span>{{ erro() }}</span>
+        <ion-button fill="outline" size="small" (click)="carregar()">Tentar novamente</ion-button>
+      </div>
+    } @else if (pagina().data.length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">✓</span>
+        <h2>Nenhum atendimento</h2>
+        <p>Não encontramos itens para a data e situação selecionadas.</p>
+      </div>
+    } @else {
+      <section class="appointments-list" aria-label="Lista de atendimentos">
+        @for (atendimento of pagina().data; track atendimento.atendimentoId) {
+          <article class="appointment-card">
+            <header class="card-header">
+              <div class="schedule-meta">
+                @if (!dataAgendamento()) {
+                  <span>
+                    <ion-icon [icon]="calendarOutline" aria-hidden="true" />
+                    {{ formatarData(atendimento.dataAgendamento) }}
+                  </span>
+                  <i aria-hidden="true"></i>
+                }
+                <span>
+                  <ion-icon [icon]="timeOutline" aria-hidden="true" />
+                  <strong>{{ formatarHora(atendimento.horaAgendamento) }}</strong>
+                </span>
+              </div>
+              <span class="status-chip" [class.completed]="situacao() === 'concluidos'">
+                {{ situacao() === 'concluidos' ? 'Concluído' : 'Aberto' }}
+              </span>
+            </header>
+
+            <div class="appointment-info">
+              <h2>{{ atendimento.nomeCliente }}</h2>
+
+              @if (atendimento.retorno) {
+                <span class="return-label">Retorno</span>
+              }
+
+              <div class="seller">
+                <ion-icon [icon]="personOutline" aria-hidden="true" />
+                <span>Vendedor</span>
+                <strong>{{ atendimento.nomeVendedor || 'Não informado' }}</strong>
+              </div>
+
+              @if (formatarEndereco(atendimento)) {
+                <a
+                  class="address-link"
+                  [href]="urlGoogleMaps(atendimento)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="
+                    'Abrir rota para ' + formatarEndereco(atendimento) + ' no Google Maps'
+                  "
+                >
+                  <ion-icon [icon]="locationOutline" aria-hidden="true" />
+                  <span>{{ formatarEndereco(atendimento) }}</span>
+                </a>
+              }
+
+              @if (atendimento.telefoneCliente) {
+                <a
+                  class="whatsapp-link"
+                  [href]="urlWhatsApp(atendimento.telefoneCliente)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="'Conversar com ' + atendimento.nomeCliente + ' no WhatsApp'"
+                >
+                  <ion-icon [icon]="logoWhatsapp" aria-hidden="true" />
+                  <span>{{ atendimento.telefoneCliente }}</span>
+                  <small>WhatsApp</small>
+                </a>
+              }
+
+              @if (atendimento.observacao) {
+                <button
+                  type="button"
+                  class="observation-preview"
+                  (click)="abrirObservacao(atendimento)"
+                >
+                  <ion-icon [icon]="chatboxEllipsesOutline" aria-hidden="true" />
+                  <span>{{ atendimento.observacao }}</span>
+                </button>
+              }
+            </div>
+
+            <footer
+              class="atendimento-card-actions"
+              [class.five-actions]="situacao() === 'nao-concluidos'"
+              [class.two-actions]="situacao() === 'concluidos'"
+              aria-label="Ações do atendimento"
+            >
+              <button
+                type="button"
+                [title]="
+                  situacao() === 'concluidos'
+                    ? 'Gerenciar arquivos da obra executada'
+                    : 'Alterar atendimento'
+                "
+                (click)="abrirAtendimento(atendimento)"
+              >
+                <ion-icon [icon]="createOutline" aria-hidden="true" />
+                <span>{{ situacao() === 'concluidos' ? 'Arquivos' : 'Alterar' }}</span>
+              </button>
+              @if (situacao() === 'nao-concluidos') {
+                <button
+                  type="button"
+                  title="Tirar foto do atendimento"
+                  aria-label="Tirar foto do atendimento"
+                  [disabled]="enviandoFotoId() !== null || enviandoVideoId() !== null"
+                  (click)="tirarFoto(atendimento)"
+                >
+                  @if (enviandoFotoId() === atendimento.atendimentoId) {
+                    @if (progressoFoto() > 0) {
+                      <small>{{ progressoFoto() }}%</small>
+                    } @else {
+                      <ion-spinner name="crescent" />
+                    }
+                  } @else {
+                    <ion-icon [icon]="cameraOutline" />
+                  }
+                  <span>Foto</span>
+                </button>
+                <button
+                  type="button"
+                  title="Gravar vídeo do atendimento"
+                  aria-label="Gravar vídeo do atendimento"
+                  [disabled]="enviandoFotoId() !== null || enviandoVideoId() !== null"
+                  (click)="gravarVideo(atendimento)"
+                >
+                  @if (enviandoVideoId() === atendimento.atendimentoId) {
+                    @if (progressoVideo() > 0) {
+                      <small>{{ progressoVideo() }}%</small>
+                    } @else {
+                      <ion-spinner name="crescent" />
+                    }
+                  } @else {
+                    <ion-icon [icon]="videocamOutline" />
+                  }
+                  <span>Vídeo</span>
+                </button>
+                <button
+                  type="button"
+                  title="Concluir atendimento"
+                  aria-label="Concluir atendimento"
+                  [disabled]="
+                    enviandoFotoId() !== null ||
+                    enviandoVideoId() !== null ||
+                    concluindoId() !== null
+                  "
+                  (click)="abrirConfirmacaoConclusao(atendimento)"
+                >
+                  @if (concluindoId() === atendimento.atendimentoId) {
+                    <ion-spinner name="crescent" />
+                  } @else {
+                    <ion-icon [icon]="checkmarkCircleOutline" />
+                  }
+                  <span>Concluir</span>
+                </button>
+              }
+              <button
+                type="button"
+                title="Ver fotos e vídeos da visita"
+                [disabled]="enviandoFotoId() !== null || enviandoVideoId() !== null"
+                (click)="abrirMidias(atendimento)"
+              >
+                <ion-icon [icon]="imagesOutline" aria-hidden="true" />
+                <span>Fotos/vídeos</span>
+              </button>
+            </footer>
+          </article>
+        }
+      </section>
+
+      @if (pagina().totalPages > 1) {
+        <nav class="pagination" aria-label="Paginação">
+          <button type="button" [disabled]="pagina().pageNumber <= 1" (click)="paginaAnterior()">
+            Anterior
+          </button>
+          <span>{{ pagina().pageNumber }} de {{ pagina().totalPages }}</span>
+          <button
+            type="button"
+            [disabled]="pagina().pageNumber >= pagina().totalPages"
+            (click)="proximaPagina()"
+          >
+            Próxima
+          </button>
+        </nav>
+      }
+    }
+  </main>
+
+  <ion-modal
+    class="action-modal"
+    [isOpen]="atendimentoParaConcluir() !== null"
+    [backdropDismiss]="concluindoId() === null"
+    (didDismiss)="fecharConfirmacaoConclusao()"
+  >
+    <ng-template>
+      @if (atendimentoParaConcluir(); as atendimento) {
+        <section class="action-dialog">
+          <div class="action-dialog-icon complete">
+            <ion-icon [icon]="checkmarkCircleOutline" />
+          </div>
+          <h2>Concluir atendimento?</h2>
+          <p>
+            Deseja concluir o atendimento de <strong>{{ atendimento.nomeCliente }}</strong
+            >?
+          </p>
+          <small>
+            Os dados serão bloqueados, mas os arquivos da obra continuarão disponíveis para
+            gerenciamento.
+          </small>
+          <div class="action-buttons">
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="concluindoId() !== null"
+              (click)="fecharConfirmacaoConclusao()"
+            >
+              Cancelar
+            </ion-button>
+            <ion-button [disabled]="concluindoId() !== null" (click)="concluirAtendimento()">
+              @if (concluindoId() !== null) {
+                <ion-spinner name="crescent" />
+              } @else {
+                Concluir
+              }
+            </ion-button>
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="observation-modal"
+    [isOpen]="observacaoSelecionada() !== null"
+    (didDismiss)="fecharObservacao()"
+  >
+    <ng-template>
+      @if (observacaoSelecionada(); as atendimento) {
+        <section class="observation-dialog">
+          <header>
+            <div>
+              <span>Observação</span>
+              <h2>{{ atendimento.nomeCliente }}</h2>
+            </div>
+            <button type="button" aria-label="Fechar observação" (click)="fecharObservacao()">
+              &times;
+            </button>
+          </header>
+          <p>{{ atendimento.observacao }}</p>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="source-media-modal"
+    [isOpen]="atendimentoMidias() !== null"
+    (didDismiss)="fecharMidias()"
+  >
+    <ng-template>
+      @if (atendimentoMidias(); as atendimento) {
+        <section class="source-media-dialog">
+          <header>
+            <div class="source-media-heading">
+              <span><ion-icon [icon]="imagesOutline" aria-hidden="true" /></span>
+              <div>
+                <small>Arquivos do agendamento</small>
+                <h2>{{ atendimento.nomeCliente }}</h2>
+              </div>
+            </div>
+            <button type="button" aria-label="Fechar fotos e vídeos" (click)="fecharMidias()">
+              <ion-icon [icon]="closeOutline" />
+            </button>
+          </header>
+
+          <div class="source-media-body" [class.viewing]="arquivoSelecionado() !== null">
+            @if (arquivoSelecionado(); as arquivo) {
+              <button type="button" class="source-media-back" (click)="fecharVisualizacao()">
+                <ion-icon [icon]="arrowBackOutline" />
+                Voltar para fotos e vídeos
+              </button>
+
+              <div class="source-media-viewer">
+                @if (carregandoArquivoId() === arquivo.arquivoId) {
+                  <div class="source-media-state">
+                    <ion-spinner name="crescent" />
+                    <strong>Baixando {{ ehVideo(arquivo) ? 'vídeo' : 'foto' }}...</strong>
+                    <div
+                      class="source-download-progress"
+                      role="progressbar"
+                      aria-label="Progresso do download"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      [attr.aria-valuenow]="totalBytes() > 0 ? progressoDownload() : null"
+                    >
+                      <span
+                        [class.indeterminate]="totalBytes() === 0"
+                        [style.width.%]="totalBytes() > 0 ? progressoDownload() : 35"
+                      ></span>
+                    </div>
+                    <small>{{ descricaoProgresso() }}</small>
+                  </div>
+                } @else if (erroVisualizacao()) {
+                  <div class="source-media-state error">
+                    <ion-icon [icon]="alertCircleOutline" />
+                    <strong>Não foi possível abrir o arquivo.</strong>
+                    <small>{{ erroVisualizacao() }}</small>
+                  </div>
+                } @else if (urlVisualizacao()) {
+                  @if (ehVideo(arquivo)) {
+                    <div class="source-media-video">
+                      <video
+                        [src]="urlVisualizacao()"
+                        [playbackRate]="velocidadeVideo()"
+                        controls
+                        playsinline
+                        autoplay
+                      ></video>
+                      <label>
+                        <span>Velocidade</span>
+                        <select
+                          [value]="velocidadeVideo()"
+                          aria-label="Velocidade do vídeo"
+                          (change)="ajustarVelocidadeVideo($event)"
+                        >
+                          <option value="0.5">0,5×</option>
+                          <option value="1">1×</option>
+                          <option value="1.5">1,5×</option>
+                          <option value="2">2×</option>
+                        </select>
+                      </label>
+                    </div>
+                  } @else if (ehImagem(arquivo)) {
+                    <img [src]="urlVisualizacao()" [alt]="arquivo.nomeOriginal" />
+                  } @else {
+                    <div class="source-media-state unsupported">
+                      <ion-icon [icon]="documentOutline" />
+                      <strong>{{ arquivo.nomeOriginal }}</strong>
+                      <small>Este tipo de arquivo não possui visualização.</small>
+                    </div>
+                  }
+                }
+              </div>
+            } @else if (carregandoMidias()) {
+              <div class="source-media-state">
+                <ion-spinner name="crescent" />
+                <strong>Buscando fotos e vídeos...</strong>
+              </div>
+            } @else if (erroMidias()) {
+              <div class="source-media-state error">
+                <ion-icon [icon]="alertCircleOutline" />
+                <strong>Não foi possível buscar os arquivos.</strong>
+                <small>{{ erroMidias() }}</small>
+                <ion-button size="small" (click)="abrirMidias(atendimento)">
+                  Tentar novamente
+                </ion-button>
+              </div>
+            } @else if (arquivosOrigem().length === 0) {
+              <div class="source-media-state">
+                <ion-icon [icon]="imagesOutline" />
+                <strong>Nenhuma foto ou vídeo encontrado.</strong>
+                <small>Este atendimento não possui arquivos no agendamento de origem.</small>
+              </div>
+            } @else {
+              <div class="source-media-grid">
+                @for (arquivo of arquivosOrigem(); track arquivo.arquivoId; let indice = $index) {
+                  <button
+                    type="button"
+                    class="source-media-item"
+                    (click)="visualizarArquivo(arquivo)"
+                  >
+                    <span>
+                      <ion-icon
+                        [icon]="
+                          ehVideo(arquivo)
+                            ? playCircleOutline
+                            : ehImagem(arquivo)
+                              ? imageOutline
+                              : documentOutline
+                        "
+                      />
+                    </span>
+                    <strong>{{ descricaoArquivo(arquivo, indice) }}</strong>
+                    <small>{{ arquivo.nomeOriginal }}</small>
+                    <small>{{ formatarTamanho(arquivo.tamanhoBytes) }}</small>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-toast
+    [isOpen]="!!mensagemAcao()"
+    [message]="mensagemAcao()"
+    [color]="erroAcao() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemAcao.set('')"
+  />
+
+  <ion-toast
+    [isOpen]="!!mensagemFoto()"
+    [message]="mensagemFoto()"
+    [color]="erroFoto() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemFoto.set('')"
+  />
+
+  <ion-toast
+    [isOpen]="!!mensagemVideo()"
+    [message]="mensagemVideo()"
+    [color]="erroVideo() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemVideo.set('')"
+  />
+</ion-content>

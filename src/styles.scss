@@ -1,1 +1,112 @@
-/* You can add global styles to this file, and also import other style files */
+@use './app/features/atendimentos/styles/source-media';
+
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+:root {
+  --ion-font-family: 'Segoe UI', Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ion-color-primary: #0aa6a6;
+  --ion-color-primary-rgb: 10, 166, 166;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #099292;
+  --ion-color-primary-tint: #23afaf;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #f5f9fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+ion-modal.action-modal {
+  --width: calc(100% - 2rem);
+  --max-width: 27rem;
+  --height: fit-content;
+  --border-radius: 1.1rem;
+}
+
+.action-dialog {
+  padding: 1.35rem;
+  text-align: center;
+  background: #fff;
+}
+
+.action-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.8rem;
+  border-radius: 50%;
+  font-size: 1.5rem;
+}
+
+.action-dialog-icon.complete {
+  color: #087f75;
+  background: #dff7f3;
+}
+
+.action-dialog-icon.delete {
+  color: #b62d3b;
+  background: #ffeaed;
+}
+
+.action-dialog h2 {
+  margin: 0;
+  color: #28307f;
+  font-size: 1.2rem;
+}
+
+.action-dialog p {
+  margin: 0.65rem 0;
+  color: #53667e;
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+.action-dialog > small {
+  color: #a33a45;
+}
+
+.action-warning {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.9rem 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  color: #725528;
+  background: #fff7e4;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.action-buttons.conclusion-buttons {
+  grid-template-columns: 1fr;
+}
+
+.action-buttons ion-button {
+  min-height: 2.75rem;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.card-actions .delete-action {
+  color: #c83f4d;
+}

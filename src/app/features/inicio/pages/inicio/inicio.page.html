@@ -1,0 +1,13 @@
+<ion-content [fullscreen]="true" class="home-content">
+  <main>
+    <img src="assets/logo.png" alt="Logo Metal Telhas" />
+    <p class="eyebrow">Acesso confirmado</p>
+    <h1>Olá, {{ user()?.nome || user()?.email }}!</h1>
+    <p class="description">
+      Sua sessão está pronta. A próxima etapa será carregar sua lista de
+      {{ user()?.roles?.includes('Montador') ? 'atendimentos' : 'agendamentos' }}.
+    </p>
+    @if (user()?.roles?.length) { <div class="roles">{{ user()?.roles?.join(' · ') }}</div> }
+    <ion-button fill="outline" (click)="logout()">Sair</ion-button>
+  </main>
+</ion-content>

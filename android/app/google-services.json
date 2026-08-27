@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "747203928960",
+    "project_id": "metal-calhas-mobile",
+    "storage_bucket": "metal-calhas-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747203928960:android:c89410b504f7ff6b909765",
+        "android_client_info": {
+          "package_name": "br.com.metalcalhas.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv22t7JUnavhsk7haGZXMUQjWltlZ7rm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

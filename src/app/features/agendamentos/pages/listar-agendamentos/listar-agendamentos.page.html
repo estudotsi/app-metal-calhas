@@ -1,0 +1,488 @@
+<ion-header class="app-header">
+  <ion-toolbar>
+    <div class="toolbar-content">
+      <div class="identity">
+        <img src="assets/logo.png" alt="Metal Telhas" />
+        <div>
+          <span>Meus agendamentos</span>
+          <strong>{{ user()?.nome }}</strong>
+        </div>
+      </div>
+      <ion-button fill="clear" class="logout-button" (click)="sair()">Sair</ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="appointments-content">
+  <ion-refresher slot="fixed" (ionRefresh)="atualizar($event)">
+    <ion-refresher-content pullingText="Puxe para atualizar" refreshingSpinner="crescent" />
+  </ion-refresher>
+
+  @if (enviandoFotoId() !== null) {
+    <section slot="fixed" class="video-upload-panel" role="status" aria-live="polite">
+      <div class="video-upload-heading">
+        <ion-spinner name="crescent" />
+        <div>
+          <strong>Enviando foto</strong>
+          <span>
+            {{ progressoFoto() > 0 ? progressoFoto() + '% enviado' : 'Preparando o envio...' }}
+          </span>
+        </div>
+        <b>{{ progressoFoto() }}%</b>
+      </div>
+      <div class="video-upload-track" aria-hidden="true">
+        <span [style.width.%]="progressoFoto()"></span>
+      </div>
+      <small>Mantenha o aplicativo aberto até terminar.</small>
+    </section>
+  } @else if (enviandoVideoId() !== null) {
+    <section slot="fixed" class="video-upload-panel" role="status" aria-live="polite">
+      <div class="video-upload-heading">
+        <ion-spinner name="crescent" />
+        <div>
+          <strong>Enviando vídeo</strong>
+          <span>
+            {{ progressoVideo() > 0 ? progressoVideo() + '% enviado' : 'Preparando o envio...' }}
+          </span>
+        </div>
+        <b>{{ progressoVideo() }}%</b>
+      </div>
+      <div class="video-upload-track" aria-hidden="true">
+        <span [style.width.%]="progressoVideo()"></span>
+      </div>
+      <small>Mantenha o aplicativo aberto até terminar.</small>
+    </section>
+  }
+
+  <main>
+    <section class="page-intro">
+      <div>
+        <p>Agenda do dia</p>
+        <h1>{{ situacao() === 'abertos' ? 'Próximos serviços' : 'Serviços concluídos' }}</h1>
+      </div>
+      <div class="intro-actions">
+        <button
+          type="button"
+          class="refresh-button"
+          [disabled]="carregando()"
+          aria-label="Atualizar agendamentos"
+          (click)="carregar()"
+        >
+          @if (carregando()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <span aria-hidden="true">&#8635;</span>
+          }
+          Atualizar
+        </button>
+        <span class="total-badge">{{ pagina().total }}</span>
+      </div>
+    </section>
+
+    <nav class="status-tabs" aria-label="Situação dos agendamentos">
+      <button type="button" [class.active]="situacao() === 'abertos'" (click)="alterarSituacao('abertos')">
+        Não concluídos
+      </button>
+      <button type="button" [class.active]="situacao() === 'concluidos'" (click)="alterarSituacao('concluidos')">
+        Concluídos
+      </button>
+    </nav>
+
+    <div class="date-filter">
+      <div>
+        <span>Data dos agendamentos</span>
+        <small>Escolha o dia da agenda</small>
+      </div>
+
+      <div class="date-actions">
+        @if (dataAgendamento()) {
+          <button type="button" class="clear-date" (click)="limparData()">Limpar</button>
+        }
+        <ion-datetime-button datetime="data-agendamentos" />
+      </div>
+      <ion-modal class="date-modal" [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime
+            id="data-agendamentos"
+            presentation="date"
+            locale="pt-BR"
+            [firstDayOfWeek]="0"
+            [showDefaultButtons]="true"
+            [showClearButton]="true"
+            doneText="Confirmar"
+            cancelText="Cancelar"
+            clearText="Limpar"
+            [value]="dataAgendamento() || undefined"
+            (ionChange)="alterarData($event)"
+          />
+        </ng-template>
+      </ion-modal>
+    </div>
+
+    <div class="sort-filter">
+      <span>Ordenar por horário</span>
+      <button type="button" [disabled]="carregando()" (click)="alternarDirecaoHora()">
+        @if (direcaoHora() === 'asc') {
+          Mais cedo primeiro <strong aria-hidden="true">&uarr;</strong>
+        } @else {
+          Mais tarde primeiro <strong aria-hidden="true">&darr;</strong>
+        }
+      </button>
+    </div>
+
+    @if (carregando()) {
+      <div class="state-message"><ion-spinner name="crescent" /><span>Carregando agenda...</span></div>
+    } @else if (erro()) {
+      <div class="state-message error-state">
+        <span>{{ erro() }}</span>
+        <ion-button fill="outline" size="small" (click)="carregar()">Tentar novamente</ion-button>
+      </div>
+    } @else if (pagina().data.length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">✓</span>
+        <h2>Nenhum agendamento</h2>
+        <p>Não encontramos itens para a data e situação selecionadas.</p>
+      </div>
+    } @else {
+      <section class="appointments-list" aria-label="Lista de agendamentos">
+        @for (agendamento of pagina().data; track agendamento.agendamentoId) {
+          <article class="appointment-card">
+            <header class="card-header">
+              <div class="schedule-meta">
+                @if (!dataAgendamento()) {
+                  <span>
+                    <ion-icon [icon]="calendarOutline" aria-hidden="true" />
+                    {{ formatarData(agendamento.dataAgendamento) }}
+                  </span>
+                  <i aria-hidden="true"></i>
+                }
+                <span>
+                  <ion-icon [icon]="timeOutline" aria-hidden="true" />
+                  <strong>{{ formatarHora(agendamento.horaAgendamento) }}</strong>
+                </span>
+              </div>
+              <span class="status-chip" [class.completed]="!agendamento.aberto">
+                {{ agendamento.aberto ? 'Aberto' : 'Concluído' }}
+              </span>
+            </header>
+
+            <div class="appointment-info">
+              <h2>{{ agendamento.nomeCliente }}</h2>
+
+              <div class="seller">
+                <ion-icon [icon]="personOutline" aria-hidden="true" />
+                <span>Vendedor</span>
+                <strong>{{ agendamento.nomeVendedor || 'Não informado' }}</strong>
+              </div>
+
+              @if (formatarEndereco(agendamento)) {
+                <a
+                  class="address-link"
+                  [href]="urlGoogleMaps(agendamento)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="'Abrir rota para ' + formatarEndereco(agendamento) + ' no Google Maps'"
+                >
+                  <ion-icon [icon]="locationOutline" aria-hidden="true" />
+                  <span>{{ formatarEndereco(agendamento) }}</span>
+                </a>
+              }
+
+              @if (agendamento.telefoneCliente) {
+                <a
+                  class="whatsapp-link"
+                  [href]="urlWhatsApp(agendamento.telefoneCliente)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="'Conversar com ' + agendamento.nomeCliente + ' no WhatsApp'"
+                >
+                  <ion-icon [icon]="logoWhatsapp" aria-hidden="true" />
+                  <span>{{ agendamento.telefoneCliente }}</span>
+                  <small>WhatsApp</small>
+                </a>
+              }
+
+              @if (agendamento.observacao) {
+                <button type="button" class="observation-preview" (click)="abrirObservacao(agendamento)">
+                  <ion-icon [icon]="chatboxEllipsesOutline" aria-hidden="true" />
+                  <span>{{ agendamento.observacao }}</span>
+                </button>
+              }
+            </div>
+
+            <footer
+              class="card-actions"
+              [class.completed-actions]="!agendamento.aberto"
+              [class.new-appointment-actions]="podeCriarNovoAgendamento(agendamento)"
+              aria-label="Ações do agendamento"
+            >
+              @if (agendamento.aberto) {
+                <button
+                  type="button"
+                  class="photo-action"
+                  title="Tirar foto"
+                  aria-label="Tirar foto"
+                  [disabled]="enviandoFotoId() !== null || enviandoVideoId() !== null"
+                  (click)="tirarFoto(agendamento)"
+                >
+                  @if (enviandoFotoId() === agendamento.agendamentoId) {
+                    @if (progressoFoto() > 0) {
+                      <small>{{ progressoFoto() }}%</small>
+                    } @else {
+                      <ion-spinner name="crescent" />
+                    }
+                  } @else {
+                    <ion-icon [icon]="cameraOutline" />
+                  }
+                </button>
+                <button
+                  type="button"
+                  class="video-action"
+                  title="Filmar"
+                  aria-label="Filmar"
+                  [disabled]="enviandoFotoId() !== null || enviandoVideoId() !== null"
+                  (click)="gravarVideo(agendamento)"
+                >
+                  @if (enviandoVideoId() === agendamento.agendamentoId) {
+                    @if (progressoVideo() > 0) {
+                      <small>{{ progressoVideo() }}%</small>
+                    } @else {
+                      <ion-spinner name="crescent" />
+                    }
+                  } @else {
+                    <ion-icon [icon]="videocamOutline" />
+                  }
+                </button>
+                <button
+                  type="button"
+                  title="Alterar"
+                  aria-label="Alterar agendamento"
+                  [disabled]="concluindoId() !== null || excluindoId() !== null"
+                  (click)="alterarAgendamento(agendamento)"
+                >
+                  <ion-icon [icon]="createOutline" />
+                </button>
+                <button
+                  type="button"
+                  class="complete-action"
+                  title="Concluir"
+                  aria-label="Concluir agendamento"
+                  [disabled]="concluindoId() !== null || excluindoId() !== null"
+                  (click)="abrirConfirmacaoConclusao(agendamento)"
+                >
+                  @if (concluindoId() === agendamento.agendamentoId) {
+                    <ion-spinner name="crescent" />
+                  } @else {
+                    <ion-icon [icon]="checkmarkCircleOutline" />
+                  }
+                </button>
+                <button
+                  type="button"
+                  class="delete-action"
+                  title="Excluir"
+                  aria-label="Excluir agendamento"
+                  [disabled]="concluindoId() !== null || excluindoId() !== null"
+                  (click)="abrirConfirmacaoExclusao(agendamento)"
+                >
+                  @if (excluindoId() === agendamento.agendamentoId) {
+                    <ion-spinner name="crescent" />
+                  } @else {
+                    <ion-icon [icon]="trashOutline" />
+                  }
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  title="Visualizar"
+                  aria-label="Visualizar agendamento"
+                  [disabled]="criandoNovoId() !== null"
+                  (click)="alterarAgendamento(agendamento)"
+                >
+                  <ion-icon [icon]="eyeOutline" />
+                  <span>Visualizar detalhes</span>
+                </button>
+                @if (podeCriarNovoAgendamento(agendamento)) {
+                  <button
+                    type="button"
+                    class="new-appointment-action"
+                    title="Criar novo agendamento neste processo"
+                    aria-label="Criar novo agendamento neste processo"
+                    [disabled]="criandoNovoId() !== null"
+                    (click)="abrirConfirmacaoNovoAgendamento(agendamento)"
+                  >
+                    @if (criandoNovoId() === agendamento.agendamentoId) {
+                      <ion-spinner name="crescent" />
+                    } @else {
+                      <ion-icon [icon]="calendarOutline" />
+                    }
+                    <span>Novo agendamento</span>
+                  </button>
+                }
+              }
+            </footer>
+          </article>
+        }
+      </section>
+
+      @if (pagina().totalPages > 1) {
+        <nav class="pagination" aria-label="Paginação">
+          <button type="button" [disabled]="pagina().pageNumber <= 1" (click)="paginaAnterior()">Anterior</button>
+          <span>{{ pagina().pageNumber }} de {{ pagina().totalPages }}</span>
+          <button type="button" [disabled]="pagina().pageNumber >= pagina().totalPages" (click)="proximaPagina()">Próxima</button>
+        </nav>
+      }
+    }
+  </main>
+
+  <ion-modal
+    class="observation-modal"
+    [isOpen]="observacaoSelecionada() !== null"
+    (didDismiss)="fecharObservacao()"
+  >
+    <ng-template>
+      @if (observacaoSelecionada(); as agendamento) {
+        <section class="observation-dialog">
+          <header>
+            <div>
+              <span>Observação</span>
+              <h2>{{ agendamento.nomeCliente }}</h2>
+            </div>
+            <button type="button" aria-label="Fechar observação" (click)="fecharObservacao()">&times;</button>
+          </header>
+          <p>{{ agendamento.observacao }}</p>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="action-modal"
+    [isOpen]="agendamentoParaNovo() !== null"
+    [backdropDismiss]="criandoNovoId() === null"
+    (didDismiss)="fecharConfirmacaoNovoAgendamento()"
+  >
+    <ng-template>
+      @if (agendamentoParaNovo(); as agendamento) {
+        <section class="action-dialog">
+          <div class="action-dialog-icon complete">
+            <ion-icon [icon]="calendarOutline" />
+          </div>
+          <h2>Criar novo agendamento?</h2>
+          <p>
+            Será criado um novo agendamento para <strong>{{ agendamento.nomeCliente }}</strong>
+            no mesmo processo de orçamento.
+          </p>
+          <div class="action-warning">
+            <strong>Novo agendamento em aberto</strong>
+            <span>Ele será atribuído a você e ficará sem data e horário para preenchimento.</span>
+          </div>
+          <div class="action-buttons">
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="criandoNovoId() !== null"
+              (click)="fecharConfirmacaoNovoAgendamento()"
+            >
+              Cancelar
+            </ion-button>
+            <ion-button
+              [disabled]="criandoNovoId() !== null"
+              (click)="criarNovoAgendamento()"
+            >
+              @if (criandoNovoId() !== null) {
+                <ion-spinner name="crescent" />
+              } @else {
+                Criar agendamento
+              }
+            </ion-button>
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="action-modal"
+    [isOpen]="agendamentoParaConcluir() !== null"
+    [backdropDismiss]="concluindoId() === null"
+    (didDismiss)="fecharConfirmacaoConclusao()"
+  >
+    <ng-template>
+      @if (agendamentoParaConcluir(); as agendamento) {
+        <section class="action-dialog">
+          <div class="action-dialog-icon complete"><ion-icon [icon]="checkmarkCircleOutline" /></div>
+          <h2>Concluir agendamento?</h2>
+          <p>Escolha como deseja finalizar o agendamento de <strong>{{ agendamento.nomeCliente }}</strong>.</p>
+          <div class="action-warning">
+            <strong>Fechar sem orçamento</strong>
+            <span>Não criará processo nem orçamento para este agendamento.</span>
+          </div>
+          <div class="action-buttons conclusion-buttons">
+            <ion-button fill="clear" color="medium" [disabled]="concluindoId() !== null" (click)="fecharConfirmacaoConclusao()">
+              Cancelar
+            </ion-button>
+            <ion-button fill="outline" color="medium" [disabled]="concluindoId() !== null" (click)="concluirAgendamento(false)">
+              Fechar sem orçamento
+            </ion-button>
+            <ion-button [disabled]="concluindoId() !== null" (click)="concluirAgendamento(true)">
+              @if (concluindoId() !== null) { <ion-spinner name="crescent" /> } @else { Concluir e criar orçamento }
+            </ion-button>
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="action-modal"
+    [isOpen]="agendamentoParaExcluir() !== null"
+    [backdropDismiss]="excluindoId() === null"
+    (didDismiss)="fecharConfirmacaoExclusao()"
+  >
+    <ng-template>
+      @if (agendamentoParaExcluir(); as agendamento) {
+        <section class="action-dialog">
+          <div class="action-dialog-icon delete"><ion-icon [icon]="trashOutline" /></div>
+          <h2>Excluir agendamento?</h2>
+          <p>Deseja realmente excluir o agendamento de <strong>{{ agendamento.nomeCliente }}</strong>?</p>
+          <small>Esta ação não poderá ser desfeita.</small>
+          <div class="action-buttons">
+            <ion-button fill="clear" color="medium" [disabled]="excluindoId() !== null" (click)="fecharConfirmacaoExclusao()">
+              Cancelar
+            </ion-button>
+            <ion-button color="danger" [disabled]="excluindoId() !== null" (click)="excluirAgendamento()">
+              @if (excluindoId() !== null) { <ion-spinner name="crescent" /> } @else { Sim, excluir }
+            </ion-button>
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-toast
+    [isOpen]="!!mensagemFoto()"
+    [message]="mensagemFoto()"
+    [color]="erroFoto() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemFoto.set('')"
+  />
+
+  <ion-toast
+    [isOpen]="!!mensagemVideo()"
+    [message]="mensagemVideo()"
+    [color]="erroVideo() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemVideo.set('')"
+  />
+
+  <ion-toast
+    [isOpen]="!!mensagemAcao()"
+    [message]="mensagemAcao()"
+    [color]="erroAcao() ? 'danger' : 'success'"
+    [duration]="4500"
+    position="top"
+    (didDismiss)="mensagemAcao.set('')"
+  />
+</ion-content>

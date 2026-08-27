@@ -1,0 +1,87 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <main class="auth-page">
+    <section class="auth-card">
+      <aside class="auth-panel">
+        <div class="brand">
+          <img src="assets/logo.png" alt="Logo Metal Telhas" />
+          <div>
+            <h1>Metal Telhas</h1>
+            <p>Aplicativo da equipe</p>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <span><b aria-hidden="true">✓</b> Acesso seguro</span>
+          <span><b aria-hidden="true">◆</b> Sua rotina em um só lugar</span>
+        </div>
+      </aside>
+
+      <div class="auth-content">
+        <header class="auth-title">
+          <span class="secure-badge">Ambiente seguro</span>
+          <h2>Entrar no aplicativo</h2>
+          <p>Informe seu e-mail e senha para continuar.</p>
+        </header>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="field-group">
+            <ion-label for="email">E-mail</ion-label>
+            <ion-item lines="none" class="input-item" [class.input-invalid]="form.controls.email.invalid && form.controls.email.touched">
+              <ion-input id="email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" formControlName="email" />
+            </ion-item>
+            @if (form.controls.email.invalid && form.controls.email.touched) {
+              <ion-text color="danger" class="validation-message">Informe um e-mail válido.</ion-text>
+            }
+          </div>
+
+          <div class="field-group">
+            <ion-label for="senha">Senha</ion-label>
+            <ion-item lines="none" class="input-item" [class.input-invalid]="form.controls.senha.invalid && form.controls.senha.touched">
+              <ion-input id="senha" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password" placeholder="Digite sua senha" formControlName="senha" />
+              <ion-button type="button" fill="clear" slot="end" class="password-toggle" (click)="togglePassword()">
+                {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+              </ion-button>
+            </ion-item>
+            @if (form.controls.senha.invalid && form.controls.senha.touched) {
+              <ion-text color="danger" class="validation-message">Informe sua senha.</ion-text>
+            }
+          </div>
+
+          @if (errorMessage()) {
+            <div class="error-box" role="alert">{{ errorMessage() }}</div>
+          }
+
+          <ion-button type="submit" expand="block" class="submit-button" [disabled]="loading()">
+            @if (loading()) {
+              <ion-spinner name="crescent" />
+              Entrando...
+            } @else {
+              Entrar
+            }
+          </ion-button>
+
+          @if (biometriaSalva()) {
+            <div class="login-divider"><span>ou</span></div>
+            <ion-button
+              type="button"
+              expand="block"
+              fill="outline"
+              class="biometric-button"
+              [disabled]="loading() || loadingBiometria()"
+              (click)="entrarComBiometria()"
+            >
+              @if (loadingBiometria()) {
+                <ion-spinner name="crescent" />
+              } @else {
+                <ion-icon slot="start" [icon]="fingerPrintOutline" />
+              }
+              Entrar com biometria
+            </ion-button>
+          }
+        </form>
+
+        <p class="access-note">Acesso exclusivo para colaboradores</p>
+      </div>
+    </section>
+  </main>
+</ion-content>

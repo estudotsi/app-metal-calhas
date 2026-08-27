@@ -1,0 +1,8 @@
+.home-content { --background: #f5f9fb; }
+main { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; padding: 2rem; color: #17304f; text-align: center; }
+img { width: 6rem; margin-bottom: 2rem; border-radius: 1.2rem; box-shadow: 0 14px 35px rgb(23 48 79 / 16%); }
+.eyebrow { margin: 0 0 0.7rem; color: #0aa6a6; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(2rem, 7vw, 3rem); letter-spacing: -0.04em; }
+.description { max-width: 32rem; margin: 1rem 0; color: #708096; line-height: 1.6; }
+.roles { margin-bottom: 1.5rem; padding: 0.5rem 0.9rem; border-radius: 2rem; color: #a9440e; background: #fff0e8; font-size: 0.8rem; font-weight: 700; }
+ion-button { --border-color: #0aa6a6; --color: #0aa6a6; }

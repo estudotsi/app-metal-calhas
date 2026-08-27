@@ -1,0 +1,739 @@
+:host {
+  --brand-blue: #28307f;
+  --brand-turquoise: #0aa6a6;
+  --brand-orange: #f36a21;
+  --ink: #182b4a;
+  --muted: #75849a;
+}
+
+.app-header {
+  box-shadow: none;
+}
+
+.app-header ion-toolbar {
+  --background: linear-gradient(135deg, #17265c, var(--brand-blue));
+  --border-width: 0;
+  --color: #fff;
+  --min-height: 5.25rem;
+  padding-top: env(safe-area-inset-top);
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
+.identity img {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 20%);
+}
+
+.identity div {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.identity span {
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.7rem;
+}
+
+.identity strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button {
+  --color: #78e4da;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.appointments-content {
+  --background: #f1f6f8;
+}
+
+main {
+  width: min(46rem, 100%);
+  margin: 0 auto;
+  padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+.video-upload-panel {
+  top: calc(0.8rem + env(safe-area-inset-top));
+  right: 1rem;
+  left: 1rem;
+  z-index: 30;
+  width: min(calc(100% - 2rem), 28rem);
+  margin-inline: auto;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgb(10 166 166 / 28%);
+  border-radius: 1rem;
+  color: #fff;
+  background: linear-gradient(135deg, #17265c, #28307f);
+  box-shadow: 0 0.9rem 2.2rem rgb(16 30 66 / 30%);
+}
+
+.video-upload-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.video-upload-heading ion-spinner {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #78e4da;
+}
+
+.video-upload-heading div {
+  display: grid;
+  flex: 1;
+  gap: 0.1rem;
+}
+
+.video-upload-heading strong {
+  font-size: 0.82rem;
+}
+
+.video-upload-heading span,
+.video-upload-panel small {
+  color: rgb(255 255 255 / 70%);
+  font-size: 0.65rem;
+}
+
+.video-upload-heading b {
+  color: #78e4da;
+  font-size: 0.78rem;
+}
+
+.video-upload-track {
+  overflow: hidden;
+  height: 0.35rem;
+  margin: 0.7rem 0 0.45rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 18%);
+}
+
+.video-upload-track span {
+  display: block;
+  min-width: 0.2rem;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0aa6a6, #78e4da);
+  transition: width 160ms ease-out;
+}
+
+.page-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.page-intro p {
+  margin: 0 0 0.2rem;
+  color: var(--brand-turquoise);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.page-intro h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.55rem;
+  font-weight: 780;
+  letter-spacing: -0.035em;
+}
+
+.intro-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.7rem;
+  padding: 0 0.65rem;
+  border: 1px solid #d7e2e8;
+  border-radius: 0.75rem;
+  color: var(--brand-turquoise);
+  background: #fff;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.refresh-button span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.refresh-button ion-spinner {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--brand-turquoise);
+}
+
+.refresh-button:disabled {
+  opacity: 0.55;
+}
+
+.total-badge {
+  display: grid;
+  place-items: center;
+  min-width: 2.7rem;
+  height: 2.7rem;
+  padding-inline: 0.55rem;
+  border-radius: 0.85rem;
+  color: #a54615;
+  background: #fff0e7;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.status-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 1rem;
+  padding: 0.25rem;
+  border: 1px solid #dce6eb;
+  border-radius: 0.85rem;
+  background: #e7eef2;
+}
+
+.status-tabs button {
+  min-height: 2.55rem;
+  border: 0;
+  border-radius: 0.65rem;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.status-tabs button.active {
+  color: var(--brand-blue);
+  background: #fff;
+  box-shadow: 0 0.25rem 0.8rem rgb(24 43 74 / 9%);
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d7e2e8;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.date-filter > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.date-filter span {
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.date-filter small {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.date-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.clear-date {
+  padding: 0.4rem;
+  border: 0;
+  color: var(--brand-turquoise);
+  background: transparent;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.date-filter ion-datetime-button::part(native) {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.6rem;
+  color: var(--brand-blue);
+  background: #eef4f6;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+ion-modal.date-modal {
+  --width: fit-content;
+  --min-width: 18rem;
+  --height: fit-content;
+  --border-radius: 1rem;
+}
+
+.sort-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: -0.3rem 0 1rem;
+  padding-inline: 0.15rem;
+}
+
+.sort-filter > span {
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.sort-filter button {
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  color: var(--brand-blue);
+  background: #e7eef2;
+  font: inherit;
+  font-size: 0.67rem;
+  font-weight: 800;
+}
+
+.sort-filter button:disabled {
+  opacity: 0.55;
+}
+
+.sort-filter strong {
+  color: var(--brand-orange);
+  font-size: 0.85rem;
+}
+
+.appointments-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.appointments-list .appointment-card:last-child {
+  margin-bottom: 0.75rem;
+}
+
+.appointment-card {
+  overflow: hidden;
+  border: 1px solid #dce6eb;
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 0.65rem 1.6rem rgb(31 75 95 / 8%);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.78rem 1rem;
+  border-bottom: 1px solid #edf2f4;
+  background: #fff;
+}
+
+.schedule-meta,
+.schedule-meta span {
+  display: flex;
+  align-items: center;
+}
+
+.schedule-meta {
+  gap: 0.55rem;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.schedule-meta span {
+  gap: 0.3rem;
+}
+
+.schedule-meta i {
+  width: 1px;
+  height: 1rem;
+  background: #d7e2e8;
+}
+
+.schedule-meta ion-icon {
+  color: var(--brand-turquoise);
+  font-size: 0.9rem;
+}
+
+.schedule-meta strong {
+  color: var(--brand-blue);
+  font-size: 0.88rem;
+}
+
+.status-chip {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  color: var(--brand-turquoise);
+  background: #e3f7f5;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-chip.completed {
+  color: #52657d;
+  background: #e8eef2;
+}
+
+.appointment-info {
+  min-width: 0;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.appointment-info h2 {
+  margin: 0 0 0.45rem;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 780;
+  line-height: 1.3;
+}
+
+.seller {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-bottom: 0.7rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.seller ion-icon {
+  color: var(--brand-turquoise);
+  font-size: 0.85rem;
+}
+
+.seller strong {
+  overflow: hidden;
+  color: #52657d;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.address-link,
+.whatsapp-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  border-radius: 0.65rem;
+  text-decoration: none;
+}
+
+.address-link {
+  padding: 0.35rem 0.45rem;
+  color: var(--muted);
+  background: #f7fafb;
+  font-size: 0.71rem;
+  line-height: 1.45;
+}
+
+.address-link ion-icon {
+  flex: 0 0 auto;
+  color: var(--brand-orange);
+  font-size: 1rem;
+}
+
+.whatsapp-link {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  color: #087b68;
+  background: #e9f8f3;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.whatsapp-link ion-icon {
+  flex: 0 0 auto;
+  color: #19a77b;
+  font-size: 1.05rem;
+}
+
+.whatsapp-link small {
+  margin-left: auto;
+  color: #268d75;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.observation-preview {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.3rem;
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 0.6rem;
+  color: #53667e;
+  background: #f3f6f8;
+  font: inherit;
+  text-align: left;
+}
+
+.observation-preview ion-icon {
+  flex: 0 0 auto;
+  margin-right: 0.45rem;
+  color: var(--brand-blue);
+  font-size: 0.95rem;
+}
+
+.observation-preview span {
+  overflow: hidden;
+  font-size: 0.69rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid #edf2f4;
+  background: #fbfcfd;
+}
+
+.card-actions button {
+  display: grid;
+  place-items: center;
+  min-height: 2.75rem;
+  border: 0;
+  border-right: 1px solid #edf2f4;
+  color: #53667e;
+  background: transparent;
+}
+
+.card-actions button:last-child {
+  border-right: 0;
+}
+
+.card-actions ion-icon {
+  font-size: 1.05rem;
+}
+
+.card-actions .complete-action {
+  color: var(--brand-turquoise);
+}
+
+.card-actions.completed-actions {
+  grid-template-columns: 1fr;
+}
+
+.card-actions.completed-actions.new-appointment-actions {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.card-actions.completed-actions button {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--brand-blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.card-actions .new-appointment-action {
+  color: var(--brand-turquoise);
+}
+
+.card-actions button:active {
+  background: #edf4f6;
+}
+
+.card-actions button:disabled {
+  opacity: 0.45;
+}
+
+.card-actions .photo-action small,
+.card-actions .video-action small {
+  color: var(--brand-turquoise);
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.card-actions .photo-action ion-spinner,
+.card-actions .video-action ion-spinner {
+  width: 1rem;
+  height: 1rem;
+  color: var(--brand-turquoise);
+}
+
+ion-modal.observation-modal {
+  --width: calc(100% - 2rem);
+  --max-width: 24rem;
+  --height: fit-content;
+  --border-radius: 1rem;
+}
+
+.observation-dialog {
+  padding: 1.1rem;
+  background: #fff;
+}
+
+.observation-dialog header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.observation-dialog header span {
+  color: var(--brand-turquoise);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.observation-dialog h2 {
+  margin: 0.25rem 0 0;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.observation-dialog header button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  color: #607086;
+  background: #edf3f5;
+  font-size: 1.25rem;
+}
+
+.observation-dialog p {
+  margin: 0;
+  padding: 0.85rem;
+  border-radius: 0.7rem;
+  color: #53667e;
+  background: #f5f8f9;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.state-message,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 15rem;
+  padding: 2rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.state-message {
+  gap: 0.8rem;
+  font-size: 0.8rem;
+}
+
+.state-message ion-spinner {
+  color: var(--brand-turquoise);
+}
+
+.error-state ion-button {
+  --border-color: var(--brand-turquoise);
+  --color: var(--brand-turquoise);
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  color: #078b8b;
+  background: #dff5f3;
+  font-size: 1.4rem;
+}
+
+.empty-state h2 {
+  margin: 1rem 0 0.35rem;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.empty-state p {
+  max-width: 18rem;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.pagination button {
+  min-height: 2.65rem;
+  border: 1px solid #d7e2e8;
+  border-radius: 0.7rem;
+  color: var(--brand-blue);
+  background: #fff;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.pagination button:disabled {
+  color: #aab6c0;
+  background: #edf2f4;
+}
+
+.pagination span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+@media (min-width: 700px) {
+  main { padding-top: 1.75rem; }
+  .appointments-list { grid-template-columns: 1fr 1fr; }
+}

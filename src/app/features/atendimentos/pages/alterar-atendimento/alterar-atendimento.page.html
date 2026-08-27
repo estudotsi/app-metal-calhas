@@ -1,0 +1,403 @@
+<ion-header class="edit-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/atendimentos" text="" />
+    </ion-buttons>
+    <ion-title>{{ concluido() ? 'Visualizar atendimento' : 'Alterar atendimento' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="edit-content">
+  @if (carregando()) {
+    <div class="page-state">
+      <ion-spinner name="crescent" />
+      <span>Carregando atendimento...</span>
+    </div>
+  } @else if (!atendimento()) {
+    <div class="page-state error-state">
+      <strong>Não foi possível abrir o atendimento</strong>
+      <p>{{ erro() }}</p>
+    </div>
+  } @else {
+    <main>
+      <section class="page-heading">
+        <div>
+          <span>Atendimento #{{ atendimentoId }}</span>
+          <h1>{{ atendimento()?.nomeCliente }}</h1>
+        </div>
+        <span class="status" [class.completed]="concluido()">
+          {{ concluido() ? 'Concluído' : 'Em aberto' }}
+        </span>
+      </section>
+
+      @if (!concluido()) {
+        <button
+          class="conclusion-action"
+          type="button"
+          [disabled]="concluindo()"
+          (click)="abrirConfirmacaoConclusao()"
+        >
+          <ion-icon [icon]="checkmarkDoneOutline" />
+          Concluir atendimento
+        </button>
+      }
+
+      @if (concluido()) {
+        <div class="locked-notice">
+          Este atendimento está concluído e os dados não podem ser alterados.
+        </div>
+      }
+
+      @if (erro()) {
+        <div class="inline-message error-message">{{ erro() }}</div>
+      }
+
+      <form class="form-card" [formGroup]="form" (ngSubmit)="salvar()">
+        <header>
+          <span>Dados do atendimento</span>
+          <small>Campos com * são obrigatórios</small>
+        </header>
+
+        <div class="field-grid">
+          <label class="field full">
+            <span>Nome do cliente *</span>
+            <input type="text" formControlName="nomeCliente" autocomplete="name" />
+            @if (form.controls.nomeCliente.touched && form.controls.nomeCliente.invalid) {
+              <small>Informe o nome do cliente.</small>
+            }
+          </label>
+
+          <label class="field full">
+            <span>Telefone *</span>
+            <input
+              type="tel"
+              inputmode="tel"
+              formControlName="telefoneCliente"
+              autocomplete="tel"
+            />
+            @if (form.controls.telefoneCliente.touched && form.controls.telefoneCliente.invalid) {
+              <small>Informe o telefone do cliente.</small>
+            }
+          </label>
+
+          <label class="field full read-only">
+            <span>Atendente</span>
+            <input type="text" formControlName="atendente" readonly />
+          </label>
+
+          <label class="field">
+            <span>Data</span>
+            <input type="date" formControlName="dataAgendamento" />
+          </label>
+
+          <label class="field">
+            <span>Horário</span>
+            <input type="time" formControlName="horaAgendamento" />
+          </label>
+
+          <label class="field full">
+            <span>Logradouro *</span>
+            <input type="text" formControlName="logradouro" autocomplete="street-address" />
+            @if (form.controls.logradouro.touched && form.controls.logradouro.invalid) {
+              <small>Informe o logradouro.</small>
+            }
+          </label>
+
+          <label class="field">
+            <span>Número</span>
+            <input type="text" formControlName="numero" />
+          </label>
+
+          <label class="field">
+            <span>Bairro</span>
+            <input type="text" formControlName="bairro" />
+          </label>
+
+          <label class="field full">
+            <span>Cidade</span>
+            <input type="text" formControlName="cidade" autocomplete="address-level2" />
+          </label>
+
+          <label class="field">
+            <span>UF</span>
+            <input type="text" formControlName="uf" maxlength="2" autocapitalize="characters" />
+          </label>
+
+          <label class="field full">
+            <span>Observação</span>
+            <textarea formControlName="observacao" rows="5" maxlength="1000"></textarea>
+            <small class="counter">{{ form.controls.observacao.value.length }}/1000</small>
+          </label>
+        </div>
+
+        @if (!concluido()) {
+          <button class="primary-action" type="submit" [disabled]="salvando()">
+            @if (salvando()) {
+              <ion-spinner name="crescent" />
+            } @else {
+              <ion-icon [icon]="saveOutline" />
+            }
+            {{ salvando() ? 'Salvando...' : 'Salvar alterações' }}
+          </button>
+        }
+      </form>
+
+      <section class="files-card">
+        <header>
+          <div>
+            <span>Arquivos da obra executada</span>
+            <small>{{ arquivos().length }} arquivo(s) anexado(s)</small>
+          </div>
+        </header>
+
+        <p class="files-description">
+          Fotos, vídeos e documentos da execução. Estes arquivos podem ser gerenciados mesmo após a
+          conclusão do atendimento. Os arquivos recebidos do agendamento continuam disponíveis
+          somente para visualização na opção Visita.
+        </p>
+
+        <div class="media-actions">
+          <button type="button" [disabled]="!!capturandoMidia()" (click)="tirarFoto()">
+            <ion-icon [icon]="cameraOutline" />
+            <span>Tirar foto</span>
+          </button>
+          <button type="button" [disabled]="!!capturandoMidia()" (click)="gravarVideo()">
+            <ion-icon [icon]="videocamOutline" />
+            <span>Gravar vídeo</span>
+          </button>
+          <label class="file-picker" [class.disabled]="enviandoArquivos()">
+            <ion-icon [icon]="attachOutline" />
+            <span>Escolher arquivos</span>
+            <input
+              type="file"
+              multiple
+              [disabled]="enviandoArquivos()"
+              (change)="selecionarArquivos($event)"
+            />
+          </label>
+        </div>
+
+        @if (capturandoMidia()) {
+          <div class="upload-status">
+            <div>
+              <ion-spinner name="crescent" />
+              <span>{{ capturandoMidia() === 'foto' ? 'Enviando foto' : 'Enviando vídeo' }}</span>
+              <strong>{{ progressoMidia() }}%</strong>
+            </div>
+            <span class="progress-track"><i [style.width.%]="progressoMidia()"></i></span>
+          </div>
+        }
+
+        @if (arquivosSelecionados().length) {
+          <div class="selected-files">
+            <div class="selected-heading">
+              <div>
+                <strong>Arquivos selecionados</strong>
+                <small>{{ formatarTamanho(tamanhoTotalSelecionado()) }} no total</small>
+              </div>
+              <button
+                type="button"
+                [disabled]="enviandoArquivos()"
+                (click)="arquivosSelecionados.set([])"
+              >
+                Limpar
+              </button>
+            </div>
+
+            @for (arquivo of arquivosSelecionados(); track arquivo.name + $index; let i = $index) {
+              <div class="selected-row">
+                <ion-icon [icon]="documentOutline" />
+                <div>
+                  <strong>{{ arquivo.name }}</strong>
+                  <small>{{ formatarTamanho(arquivo.size) }}</small>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Remover arquivo"
+                  [disabled]="enviandoArquivos()"
+                  (click)="removerSelecionado(i)"
+                >
+                  &times;
+                </button>
+              </div>
+            }
+
+            @if (enviandoArquivos()) {
+              <span class="progress-track"><i [style.width.%]="progressoUpload()"></i></span>
+            }
+
+            <button
+              class="send-files"
+              type="button"
+              [disabled]="enviandoArquivos()"
+              (click)="enviarArquivos()"
+            >
+              @if (enviandoArquivos()) {
+                <ion-spinner name="crescent" />
+              }
+              {{ enviandoArquivos() ? progressoUpload() + '% enviado' : 'Enviar arquivos' }}
+            </button>
+          </div>
+        }
+
+        <div class="attached-list">
+          @if (!arquivos().length) {
+            <div class="empty-files">
+              <ion-icon [icon]="documentOutline" />
+              <span>Nenhum arquivo da obra executada.</span>
+            </div>
+          } @else {
+            @for (arquivo of arquivos(); track arquivo.atendimentoArquivoId) {
+              <article class="file-row">
+                <span class="file-icon"><ion-icon [icon]="iconeArquivo(arquivo)" /></span>
+                <div class="file-info">
+                  <strong>{{ arquivo.nomeOriginal }}</strong>
+                  <small>
+                    {{ formatarTamanho(arquivo.tamanhoBytes) }} ·
+                    {{ formatarData(arquivo.dataUpload) }}
+                  </small>
+                </div>
+                <div class="file-actions">
+                  <button
+                    type="button"
+                    title="Visualizar"
+                    [disabled]="arquivoProcessandoId() !== null"
+                    (click)="visualizar(arquivo)"
+                  >
+                    @if (arquivoProcessandoId() === arquivo.atendimentoArquivoId) {
+                      <ion-spinner name="crescent" />
+                    } @else {
+                      <ion-icon [icon]="eyeOutline" />
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    title="Baixar"
+                    [disabled]="arquivoProcessandoId() !== null"
+                    (click)="baixar(arquivo)"
+                  >
+                    <ion-icon [icon]="cloudDownloadOutline" />
+                  </button>
+                  <button
+                    class="delete"
+                    type="button"
+                    title="Excluir"
+                    [disabled]="arquivoProcessandoId() !== null"
+                    (click)="pedirExclusao(arquivo)"
+                  >
+                    <ion-icon [icon]="trashOutline" />
+                  </button>
+                </div>
+              </article>
+            }
+          }
+        </div>
+      </section>
+    </main>
+  }
+
+  <ion-modal class="preview-modal" [isOpen]="preview() !== null" (didDismiss)="fecharPreview()">
+    <ng-template>
+      @if (preview(); as conteudo) {
+        <section class="preview-dialog">
+          <header>
+            <div>
+              <span>Visualizar arquivo da obra</span>
+              <strong>{{ conteudo.arquivo.nomeOriginal }}</strong>
+            </div>
+            <button type="button" aria-label="Fechar" (click)="fecharPreview()">&times;</button>
+          </header>
+          <div class="preview-content">
+            @if (ehImagem(conteudo.arquivo.contentType)) {
+              <img [src]="conteudo.url" [alt]="conteudo.arquivo.nomeOriginal" />
+            } @else if (ehVideo(conteudo.arquivo.contentType)) {
+              <video [src]="conteudo.url" controls playsinline></video>
+            } @else {
+              <ion-icon [icon]="documentOutline" />
+              <p>A visualização deste tipo de arquivo não está disponível no aplicativo.</p>
+              <button type="button" (click)="baixar(conteudo.arquivo)">Baixar arquivo</button>
+            }
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="confirm-modal"
+    [isOpen]="confirmandoConclusao()"
+    (didDismiss)="fecharConfirmacaoConclusao()"
+  >
+    <ng-template>
+      <section class="confirm-dialog conclusion-dialog">
+        <span>Concluir atendimento</span>
+        <h2>Confirmar conclusão?</h2>
+        <p>
+          Os dados serão bloqueados para edição. Alterações ainda não salvas não serão aplicadas,
+          mas os arquivos da obra continuarão disponíveis para gerenciamento.
+        </p>
+        <div>
+          <button type="button" [disabled]="concluindo()" (click)="fecharConfirmacaoConclusao()">
+            Cancelar
+          </button>
+          <button
+            class="confirm-conclusion"
+            type="button"
+            [disabled]="concluindo()"
+            (click)="concluirAtendimento()"
+          >
+            @if (concluindo()) {
+              <ion-spinner name="crescent" />
+            }
+            {{ concluindo() ? 'Concluindo...' : 'Concluir' }}
+          </button>
+        </div>
+      </section>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    class="confirm-modal"
+    [isOpen]="arquivoParaExcluir() !== null"
+    (didDismiss)="cancelarExclusao()"
+  >
+    <ng-template>
+      @if (arquivoParaExcluir(); as arquivo) {
+        <section class="confirm-dialog">
+          <span>Excluir arquivo da obra</span>
+          <h2>Deseja excluir este arquivo?</h2>
+          <p>{{ arquivo.nomeOriginal }}</p>
+          <div>
+            <button
+              type="button"
+              [disabled]="arquivoProcessandoId() !== null"
+              (click)="cancelarExclusao()"
+            >
+              Cancelar
+            </button>
+            <button
+              class="danger"
+              type="button"
+              [disabled]="arquivoProcessandoId() !== null"
+              (click)="excluirArquivo()"
+            >
+              @if (arquivoProcessandoId() !== null) {
+                <ion-spinner name="crescent" />
+              }
+              Excluir
+            </button>
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+
+  <ion-toast
+    [isOpen]="!!mensagem()"
+    [message]="mensagem()"
+    color="success"
+    position="top"
+    [duration]="2500"
+    (didDismiss)="mensagem.set('')"
+  />
+</ion-content>

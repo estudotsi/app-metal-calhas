@@ -1,9 +1,12 @@
 {
   "name": "app-metal-calhas",
-  "version": "0.0.0",
+  "version": "1.4.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:mobile": "ng serve --host 0.0.0.0 --port 4200",
+    "android:live": "cap run android --target emulator-5554 --live-reload --host 127.0.0.1 --port 4200 --forwardPorts 4200:4200",
+    "android:logs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-logs.ps1",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -17,6 +20,9 @@
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@ionic/angular": "^9.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -24,6 +30,8 @@
     "@angular/build": "^22.1.5",
     "@angular/cli": "^22.1.5",
     "@angular/compiler-cli": "^22.1.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",

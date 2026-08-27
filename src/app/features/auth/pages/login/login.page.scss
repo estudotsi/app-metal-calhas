@@ -1,0 +1,329 @@
+:host {
+  --brand-blue: #28307f;
+  --brand-blue-dark: #17265c;
+  --brand-turquoise: #0aa6a6;
+  --brand-orange: #f36a21;
+  --ink: #182b4a;
+  --muted: #75849a;
+}
+
+.login-content {
+  --background: #eef3f7;
+}
+
+.auth-page {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 20% 15%, rgb(243 106 33 / 12%), transparent 26%),
+    linear-gradient(135deg, #edf3f6 0%, #f9fbfc 52%, #e7f2f3 100%);
+}
+
+.auth-card {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  width: min(54rem, 100%);
+  min-height: 27rem;
+  overflow: hidden;
+  border: 1px solid rgb(218 228 235 / 90%);
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4.5rem rgb(23 48 79 / 16%);
+}
+
+.auth-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 2.15rem;
+  color: #fff;
+  background: linear-gradient(155deg, var(--brand-blue-dark) 0%, var(--brand-blue) 65%, #176e81 120%);
+}
+
+.auth-panel::after {
+  position: absolute;
+  right: -5rem;
+  bottom: -6rem;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  background: rgb(243 106 33 / 24%);
+  content: '';
+}
+
+.brand {
+  position: relative;
+  z-index: 1;
+}
+
+.brand img {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1rem;
+  object-fit: cover;
+  box-shadow: 0 0.75rem 1.75rem rgb(0 0 0 / 20%);
+}
+
+.brand h1 {
+  margin: 1.1rem 0 0.35rem;
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.brand p {
+  margin: 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.88rem;
+}
+
+.panel-footer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.panel-footer span {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.8rem;
+}
+
+.panel-footer b {
+  color: #68e0d5;
+  font-size: 0.72rem;
+}
+
+.auth-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.6rem;
+}
+
+.auth-title {
+  margin-bottom: 1.5rem;
+}
+
+.secure-badge {
+  display: inline-block;
+  padding: 0.38rem 0.7rem;
+  border-radius: 2rem;
+  color: #087f80;
+  background: #e0f6f4;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.auth-title h2 {
+  margin: 0.9rem 0 0.4rem;
+  color: var(--ink);
+  font-size: 1.55rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.auth-title p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+form {
+  display: grid;
+  gap: 1rem;
+}
+
+.field-group > ion-label {
+  display: block;
+  margin: 0 0 0.45rem 0.1rem;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.input-item {
+  --background: #fff;
+  --border-radius: 0.7rem;
+  --inner-padding-end: 0.35rem;
+  --min-height: 3rem;
+  --padding-start: 0.9rem;
+  border: 1px solid #d9e3e9;
+  border-radius: 0.7rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input-item:focus-within {
+  border-color: var(--brand-turquoise);
+  box-shadow: 0 0 0 3px rgb(10 166 166 / 11%);
+}
+
+.input-item.input-invalid {
+  border-color: var(--ion-color-danger);
+}
+
+ion-input {
+  --color: var(--ink);
+  --placeholder-color: #9aa8b8;
+  --placeholder-opacity: 1;
+  font-size: 0.87rem;
+}
+
+.password-toggle {
+  --color: var(--brand-turquoise);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.validation-message {
+  display: block;
+  margin: 0.35rem 0 0 0.1rem;
+  font-size: 0.72rem;
+}
+
+.error-box {
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.55rem;
+  color: #992f1b;
+  background: #ffe7e2;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.submit-button {
+  --background: var(--brand-turquoise);
+  --background-activated: #078b8b;
+  --border-radius: 0.7rem;
+  --box-shadow: 0 0.65rem 1.4rem rgb(10 166 166 / 21%);
+  min-height: 3rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 750;
+  text-transform: none;
+}
+
+.submit-button ion-spinner {
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.85rem 0;
+  color: #9aa7b5;
+  font-size: 0.68rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  flex: 1;
+  height: 1px;
+  background: #e2e9ed;
+  content: '';
+}
+
+.biometric-button {
+  --border-color: var(--brand-turquoise);
+  --border-radius: 0.7rem;
+  --color: var(--brand-turquoise);
+  min-height: 3rem;
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 750;
+  text-transform: none;
+}
+
+.biometric-button ion-icon {
+  font-size: 1.25rem;
+}
+
+.biometric-button ion-spinner {
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.access-note {
+  margin: 1.3rem 0 0;
+  color: #9aa7b5;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .auth-page {
+    display: grid;
+    place-items: center;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .auth-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    min-height: 0;
+    border-radius: 1.15rem;
+  }
+
+  .auth-panel {
+    min-height: 11.875rem;
+    padding: 1.35rem 1.5rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .brand img {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.9rem;
+  }
+
+  .brand h1 {
+    margin: 0 0 0.2rem;
+    font-size: 1.45rem;
+  }
+
+  .panel-footer {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 0.5rem;
+  }
+
+  .panel-footer span {
+    font-size: 0.69rem;
+  }
+
+  .auth-content {
+    justify-content: flex-start;
+    padding: 1.65rem 1.5rem 1.4rem;
+  }
+
+  .auth-title {
+    margin-bottom: 1.35rem;
+  }
+
+  .auth-title h2 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 760px) {
+  .auth-panel { min-height: 9.5rem; }
+  .panel-footer { display: none; }
+  .auth-content { padding-top: 1.25rem; }
+  .auth-title { margin-bottom: 1rem; }
+}
