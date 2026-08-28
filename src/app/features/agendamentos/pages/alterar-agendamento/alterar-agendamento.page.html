@@ -82,9 +82,48 @@
             <input type="time" formControlName="horaAgendamento" />
           </label>
 
-          <label class="field full">
+          <label #enderecoAutocomplete class="field full address-autocomplete">
             <span>Logradouro *</span>
-            <input type="text" formControlName="logradouro" autocomplete="street-address" />
+            <input
+              type="text"
+              formControlName="logradouro"
+              autocomplete="off"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="sugestoes-endereco-agendamento"
+              [attr.aria-expanded]="autocompleteEnderecoAberto()"
+              (focus)="abrirAutocompleteEndereco()"
+            />
+            @if (autocompleteEnderecoAberto()) {
+              <div
+                id="sugestoes-endereco-agendamento"
+                class="address-autocomplete-panel"
+                role="listbox"
+                aria-label="Sugestões de endereço"
+              >
+                @if (buscandoEndereco()) {
+                  <div class="address-autocomplete-status" aria-live="polite">
+                    Buscando endereços...
+                  </div>
+                } @else {
+                  @for (endereco of sugestoesEndereco(); track endereco.placeId) {
+                    <button
+                      type="button"
+                      class="address-autocomplete-option"
+                      role="option"
+                      [attr.aria-label]="'Selecionar ' + endereco.descricao"
+                      (click)="selecionarEndereco(endereco)"
+                    >
+                      <strong>{{ endereco.textoPrincipal }}</strong>
+                      <span>{{ endereco.textoSecundario }}</span>
+                    </button>
+                  } @empty {
+                    <div class="address-autocomplete-status">Nenhum endereço encontrado.</div>
+                  }
+                  <div class="address-autocomplete-status" translate="no">Google Maps</div>
+                }
+              </div>
+            }
             @if (form.controls.logradouro.touched && form.controls.logradouro.invalid) {
               <small>Informe o logradouro.</small>
             }
@@ -92,7 +131,7 @@
 
           <label class="field">
             <span>Número *</span>
-            <input type="text" formControlName="numero" inputmode="text" />
+            <input #numeroInput type="text" formControlName="numero" inputmode="text" />
           </label>
 
           <label class="field">

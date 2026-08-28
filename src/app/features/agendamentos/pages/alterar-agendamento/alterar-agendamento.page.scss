@@ -199,6 +199,60 @@ main {
   font-size: 0.6rem;
 }
 
+.address-autocomplete {
+  position: relative;
+}
+
+.address-autocomplete-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 0.1rem);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 0.7rem 1.6rem rgb(23 34 59 / 16%);
+}
+
+.address-autocomplete-option {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.75rem 0.8rem;
+  border: 0;
+  border-bottom: 1px solid #edf1f3;
+  color: var(--text);
+  background: #fff;
+  text-align: left;
+}
+
+.address-autocomplete-option:active {
+  background: #edf8f7;
+}
+
+.address-autocomplete-option strong {
+  font-size: 0.76rem;
+}
+
+.address-autocomplete-option span {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.address-autocomplete-status {
+  padding: 0.65rem 0.8rem;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.address-autocomplete-status:last-child:not(:first-child) {
+  padding-block: 0.45rem;
+  border-top: 1px solid #edf1f3;
+  text-align: right;
+}
+
 .field .counter {
   justify-self: end;
   margin-top: -1.6rem;

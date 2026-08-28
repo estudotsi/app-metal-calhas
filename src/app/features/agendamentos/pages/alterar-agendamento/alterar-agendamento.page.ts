@@ -1,5 +1,18 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
@@ -27,7 +40,7 @@ import {
   trashOutline,
   videocamOutline,
 } from 'ionicons/icons';
-import { finalize } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, of, switchMap } from 'rxjs';
 import { NativeFile } from '../../../../core/native/native-file.plugin';
 import { TokenStorageService } from '../../../../core/services/token-storage.service';
 import { environment } from '../../../../../environments/environment';
@@ -36,7 +49,9 @@ import {
   AlterarAgendamentoRequest,
   ArquivoAgendamento,
 } from '../../models/agendamento';
+import { EnderecoGoogleSugestaoView } from '../../models/endereco';
 import { AgendamentosService } from '../../services/agendamentos.service';
+import { EnderecosService } from '../../services/enderecos.service';
 import { FotoAgendamentoService } from '../../services/foto-agendamento.service';
 import { VideoAgendamentoService } from '../../services/video-agendamento.service';
 
@@ -67,11 +82,19 @@ interface ArquivoPreview {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AlterarAgendamentoPage implements OnInit, OnDestroy {
+  @ViewChild('enderecoAutocomplete')
+  private enderecoAutocomplete?: ElementRef<HTMLElement>;
+
+  @ViewChild('numeroInput')
+  private numeroInput?: ElementRef<HTMLInputElement>;
+
   private readonly route = inject(ActivatedRoute);
   private readonly agendamentosService = inject(AgendamentosService);
+  private readonly enderecosService = inject(EnderecosService);
   private readonly fotoService = inject(FotoAgendamentoService);
   private readonly videoService = inject(VideoAgendamentoService);
   private readonly tokenStorage = inject(TokenStorageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   agendamentoId = 0;
 
@@ -88,6 +111,10 @@ export class AlterarAgendamentoPage implements OnInit, OnDestroy {
   readonly preview = signal<ArquivoPreview | null>(null);
   readonly capturandoMidia = signal<'foto' | 'video' | null>(null);
   readonly progressoMidia = signal(0);
+  readonly sugestoesEndereco = signal<EnderecoGoogleSugestaoView[]>([]);
+  readonly buscandoEndereco = signal(false);
+  readonly autocompleteEnderecoAberto = signal(false);
+  private sessionTokenEndereco: string | null = null;
 
   readonly concluido = computed(() => this.agendamento()?.aberto === false);
   readonly arquivos = computed(() => this.agendamento()?.arquivos ?? []);
@@ -145,6 +172,7 @@ export class AlterarAgendamentoPage implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    this.configurarAutocompleteEndereco();
     this.agendamentoId = Number(this.route.snapshot.paramMap.get('id'));
     if (!Number.isInteger(this.agendamentoId) || this.agendamentoId <= 0) {
       this.carregando.set(false);
@@ -159,6 +187,63 @@ export class AlterarAgendamentoPage implements OnInit, OnDestroy {
     this.liberarPreview();
   }
 
+  @HostListener('document:click', ['$event.target'])
+  fecharAutocompleteAoClicarFora(target: EventTarget | null): void {
+    if (!(target instanceof Node)) return;
+    if (this.enderecoAutocomplete && !this.enderecoAutocomplete.nativeElement.contains(target)) {
+      this.autocompleteEnderecoAberto.set(false);
+    }
+  }
+
+  abrirAutocompleteEndereco(): void {
+    if (
+      !this.concluido() &&
+      this.form.controls.logradouro.value.trim().length >= 3 &&
+      (this.buscandoEndereco() || this.sugestoesEndereco().length > 0)
+    ) {
+      this.autocompleteEnderecoAberto.set(true);
+    }
+  }
+
+  selecionarEndereco(sugestao: EnderecoGoogleSugestaoView): void {
+    const sessionToken = this.sessionTokenEndereco;
+    if (!sessionToken || this.buscandoEndereco() || this.concluido()) return;
+
+    this.sugestoesEndereco.set([]);
+    this.autocompleteEnderecoAberto.set(false);
+    this.buscandoEndereco.set(true);
+    this.erro.set('');
+
+    this.enderecosService
+      .buscarDetalhesGoogle(sugestao.placeId, sessionToken)
+      .pipe(
+        finalize(() => this.buscandoEndereco.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (endereco) => {
+          this.form.patchValue(
+            {
+              logradouro: endereco.logradouro.trim(),
+              bairro: endereco.bairro.trim(),
+              cidade: endereco.cidade.trim(),
+              uf: endereco.uf.trim(),
+            },
+            { emitEvent: false },
+          );
+          this.sessionTokenEndereco = null;
+          this.numeroInput?.nativeElement.focus();
+        },
+        error: (erro) =>
+          this.erro.set(
+            this.mensagemErro(
+              erro,
+              'Não foi possível carregar os detalhes do endereço selecionado.',
+            ),
+          ),
+      });
+  }
+
   salvar(): void {
     if (this.salvando() || this.concluido()) return;
     if (this.form.invalid) {
@@ -169,9 +254,27 @@ export class AlterarAgendamentoPage implements OnInit, OnDestroy {
 
     this.erro.set('');
     this.salvando.set(true);
-    this.agendamentosService
-      .alterar(this.agendamentoId, this.criarPayload())
-      .pipe(finalize(() => this.salvando.set(false)))
+    const payload = this.criarPayload();
+
+    this.enderecosService
+      .resolverEnderecoGoogle(
+        payload.logradouro,
+        payload.numero ?? '',
+        payload.bairro ?? '',
+        payload.cidade ?? '',
+        payload.uf ?? '',
+      )
+      .pipe(
+        catchError(() => of({ googlePlaceId: null, enderecoFormatado: null })),
+        map((enderecoResolvido) => ({
+          ...payload,
+          googlePlaceId: enderecoResolvido.googlePlaceId,
+        })),
+        switchMap((payloadResolvido) =>
+          this.agendamentosService.alterar(this.agendamentoId, payloadResolvido),
+        ),
+        finalize(() => this.salvando.set(false)),
+      )
       .subscribe({
         next: () => {
           this.mensagem.set('Agendamento atualizado com sucesso.');
@@ -440,8 +543,41 @@ export class AlterarAgendamentoPage implements OnInit, OnDestroy {
       bairro: this.opcional(valor.bairro),
       cidade: this.opcional(valor.cidade),
       uf: this.opcional(valor.uf)?.toUpperCase() ?? null,
+      googlePlaceId: null,
       observacao: this.opcional(valor.observacao),
     };
+  }
+
+  private configurarAutocompleteEndereco(): void {
+    this.form.controls.logradouro.valueChanges
+      .pipe(
+        map((logradouro) => logradouro.trim()),
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((logradouro) => {
+          if (logradouro.length < 3 || this.concluido()) {
+            this.sugestoesEndereco.set([]);
+            this.buscandoEndereco.set(false);
+            this.autocompleteEnderecoAberto.set(false);
+            this.sessionTokenEndereco = null;
+            return of([] as EnderecoGoogleSugestaoView[]);
+          }
+
+          this.sessionTokenEndereco ??= crypto.randomUUID();
+          this.sugestoesEndereco.set([]);
+          this.buscandoEndereco.set(true);
+          this.autocompleteEnderecoAberto.set(true);
+
+          return this.enderecosService
+            .buscarSugestoesGoogle(logradouro, this.sessionTokenEndereco)
+            .pipe(
+              catchError(() => of([] as EnderecoGoogleSugestaoView[])),
+              finalize(() => this.buscandoEndereco.set(false)),
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((enderecos) => this.sugestoesEndereco.set(enderecos));
   }
 
   private opcional(valor: string): string | null {

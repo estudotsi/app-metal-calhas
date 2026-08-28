@@ -10,6 +10,7 @@ export interface Agendamento {
   bairro?: string | null;
   cidade?: string | null;
   uf?: string | null;
+  googlePlaceId?: string | null;
   observacao?: string | null;
   dataAgendamento?: string | null;
   horaAgendamento?: string | null;
@@ -48,6 +49,7 @@ export interface AlterarAgendamentoRequest {
   bairro: string | null;
   cidade: string | null;
   uf: string | null;
+  googlePlaceId: string | null;
   observacao: string | null;
   dataAgendamento: string | null;
   horaAgendamento: string | null;

@@ -201,7 +201,12 @@ export class ListarAgendamentosPage {
       .filter(Boolean)
       .join(', ');
 
-    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}`;
+    const googlePlaceId = agendamento.googlePlaceId?.trim();
+
+    return googlePlaceId
+      ? `${url}&destination_place_id=${encodeURIComponent(googlePlaceId)}`
+      : url;
   }
 
   urlWhatsApp(telefone?: string | null): string {
