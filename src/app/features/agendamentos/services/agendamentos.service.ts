@@ -6,7 +6,6 @@ import {
   AgendamentoDetalhe,
   AgendamentosPagina,
   AlterarAgendamentoRequest,
-  ConcluirAgendamentoResponse,
   NovoAgendamentoProcessoResponse,
   SituacaoAgendamento,
 } from '../models/agendamento';
@@ -45,13 +44,6 @@ export class AgendamentosService {
 
   alterar(agendamentoId: number, request: AlterarAgendamentoRequest): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${agendamentoId}`, request);
-  }
-
-  concluir(agendamentoId: number): Observable<ConcluirAgendamentoResponse> {
-    return this.http.post<ConcluirAgendamentoResponse>(
-      `${this.baseUrl}/${agendamentoId}/concluir`,
-      null,
-    );
   }
 
   concluirSemOrcamento(agendamentoId: number): Observable<void> {

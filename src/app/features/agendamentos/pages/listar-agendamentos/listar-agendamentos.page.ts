@@ -29,7 +29,7 @@ import {
   trashOutline,
   videocamOutline,
 } from 'ionicons/icons';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Agendamento, AgendamentosPagina, SituacaoAgendamento } from '../../models/agendamento';
 import { AgendamentosService } from '../../services/agendamentos.service';
@@ -293,7 +293,7 @@ export class ListarAgendamentosPage {
     this.agendamentoParaConcluir.set(null);
   }
 
-  concluirAgendamento(criarOrcamento: boolean): void {
+  concluirAgendamento(): void {
     const agendamento = this.agendamentoParaConcluir();
     if (!agendamento?.aberto || this.concluindoId() !== null) return;
 
@@ -301,29 +301,24 @@ export class ListarAgendamentosPage {
     this.concluindoId.set(agendamentoId);
     this.erro.set('');
 
-    const operacao: Observable<unknown> = criarOrcamento
-      ? this.agendamentosService.concluir(agendamentoId)
-      : this.agendamentosService.concluirSemOrcamento(agendamentoId);
-
-    operacao.pipe(finalize(() => this.concluindoId.set(null))).subscribe({
-      next: () => {
-        this.agendamentoParaConcluir.set(null);
-        this.mensagemAcao.set(
-          criarOrcamento
-            ? 'Agendamento concluído e orçamento criado com sucesso.'
-            : 'Agendamento fechado sem gerar orçamento.',
-        );
-        this.erroAcao.set(false);
-        this.carregar();
-      },
-      error: (erro) => {
-        this.agendamentoParaConcluir.set(null);
-        this.mensagemAcao.set(
-          this.mensagemErro(erro, 'Não foi possível concluir o agendamento.'),
-        );
-        this.erroAcao.set(true);
-      },
-    });
+    this.agendamentosService
+      .concluirSemOrcamento(agendamentoId)
+      .pipe(finalize(() => this.concluindoId.set(null)))
+      .subscribe({
+        next: () => {
+          this.agendamentoParaConcluir.set(null);
+          this.mensagemAcao.set('Agendamento concluído com sucesso.');
+          this.erroAcao.set(false);
+          this.carregar();
+        },
+        error: (erro) => {
+          this.agendamentoParaConcluir.set(null);
+          this.mensagemAcao.set(
+            this.mensagemErro(erro, 'Não foi possível concluir o agendamento.'),
+          );
+          this.erroAcao.set(true);
+        },
+      });
   }
 
   abrirConfirmacaoExclusao(agendamento: Agendamento): void {

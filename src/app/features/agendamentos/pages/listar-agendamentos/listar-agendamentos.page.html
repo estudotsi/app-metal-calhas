@@ -412,20 +412,16 @@
         <section class="action-dialog">
           <div class="action-dialog-icon complete"><ion-icon [icon]="checkmarkCircleOutline" /></div>
           <h2>Concluir agendamento?</h2>
-          <p>Escolha como deseja finalizar o agendamento de <strong>{{ agendamento.nomeCliente }}</strong>.</p>
+          <p>Deseja concluir o agendamento de <strong>{{ agendamento.nomeCliente }}</strong>?</p>
           <div class="action-warning">
-            <strong>Fechar sem orçamento</strong>
             <span>Não criará processo nem orçamento para este agendamento.</span>
           </div>
-          <div class="action-buttons conclusion-buttons">
+          <div class="action-buttons">
             <ion-button fill="clear" color="medium" [disabled]="concluindoId() !== null" (click)="fecharConfirmacaoConclusao()">
               Cancelar
             </ion-button>
-            <ion-button fill="outline" color="medium" [disabled]="concluindoId() !== null" (click)="concluirAgendamento(false)">
-              Fechar sem orçamento
-            </ion-button>
-            <ion-button [disabled]="concluindoId() !== null" (click)="concluirAgendamento(true)">
-              @if (concluindoId() !== null) { <ion-spinner name="crescent" /> } @else { Concluir e criar orçamento }
+            <ion-button [disabled]="concluindoId() !== null" (click)="concluirAgendamento()">
+              @if (concluindoId() !== null) { <ion-spinner name="crescent" /> } @else { Concluir agendamento }
             </ion-button>
           </div>
         </section>

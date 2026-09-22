@@ -55,13 +55,6 @@ export interface AlterarAgendamentoRequest {
   horaAgendamento: string | null;
 }
 
-export interface ConcluirAgendamentoResponse {
-  agendamentoId: number;
-  processoOrcamentoId: number;
-  orcamentoId: number;
-  numeroVersao: number;
-}
-
 export interface NovoAgendamentoProcessoResponse {
   processoOrcamentoId: number;
   agendamentoId: number;
