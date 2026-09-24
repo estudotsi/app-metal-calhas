@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -21,8 +22,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ZoomState;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.FallbackStrategy;
 import androidx.camera.video.FileOutputOptions;
@@ -61,6 +64,8 @@ public class NativeVideoActivity extends AppCompatActivity {
     private Button pauseButton;
     private VideoCapture<Recorder> videoCapture;
     private ProcessCameraProvider cameraProvider;
+    private Camera camera;
+    private ScaleGestureDetector scaleGestureDetector;
     private Recording recording;
     private ExoPlayer player;
     private File videoFile;
@@ -120,6 +125,20 @@ public class NativeVideoActivity extends AppCompatActivity {
         previewView = new PreviewView(this);
         previewView.setScaleType(PreviewView.ScaleType.FILL_CENTER);
         root.addView(previewView, matchParent());
+
+        scaleGestureDetector = new ScaleGestureDetector(
+            this,
+            new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                @Override
+                public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                    onPinchZoom(detector.getScaleFactor());
+                    return true;
+                }
+            });
+        previewView.setOnTouchListener((view, event) -> {
+            scaleGestureDetector.onTouchEvent(event);
+            return true;
+        });
 
         playerView = new PlayerView(this);
         playerView.setUseController(true);
@@ -247,7 +266,7 @@ public class NativeVideoActivity extends AppCompatActivity {
                 videoCapture = VideoCapture.withOutput(recorder);
 
                 cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                     this,
                     CameraSelector.DEFAULT_BACK_CAMERA,
                     preview,
@@ -258,6 +277,19 @@ public class NativeVideoActivity extends AppCompatActivity {
                 finishWithError();
             }
         }, ContextCompat.getMainExecutor(this));
+    }
+
+    private void onPinchZoom(float scaleFactor) {
+        if (camera == null) return;
+
+        ZoomState zoomState = camera.getCameraInfo().getZoomState().getValue();
+        if (zoomState == null) return;
+
+        float newZoomRatio = zoomState.getZoomRatio() * scaleFactor;
+        float clampedRatio = Math.max(
+            zoomState.getMinZoomRatio(),
+            Math.min(newZoomRatio, zoomState.getMaxZoomRatio()));
+        camera.getCameraControl().setZoomRatio(clampedRatio);
     }
 
     private void toggleRecording() {
