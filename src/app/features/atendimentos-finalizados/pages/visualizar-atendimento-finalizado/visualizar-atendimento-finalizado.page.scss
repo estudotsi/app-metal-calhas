@@ -1,0 +1,12 @@
+@use '../../../agendamentos/pages/alterar-agendamento/alterar-agendamento.page';
+
+.files-description {
+  margin: -0.45rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.files-card + .files-card {
+  margin-top: 1rem;
+}

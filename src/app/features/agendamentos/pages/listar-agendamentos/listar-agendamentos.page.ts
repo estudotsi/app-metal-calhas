@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
@@ -49,6 +49,7 @@ const EMPTY_PAGE: AgendamentosPagina = {
   templateUrl: './listar-agendamentos.page.html',
   styleUrl: './listar-agendamentos.page.scss',
   imports: [
+    RouterLink,
     IonButton,
     IonContent,
     IonDatetime,

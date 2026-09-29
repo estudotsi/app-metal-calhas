@@ -1,0 +1,191 @@
+<ion-header class="edit-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/atendimentos-finalizados" text="" />
+    </ion-buttons>
+    <ion-title>Visualizar atendimento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="edit-content">
+  @if (carregando()) {
+    <div class="page-state">
+      <ion-spinner name="crescent" />
+      <span>Carregando atendimento...</span>
+    </div>
+  } @else if (atendimento(); as atendimento) {
+    <main>
+      <section class="page-heading">
+        <div>
+          <span>Atendimento #{{ atendimentoId }}</span>
+          <h1>{{ atendimento.nomeCliente }}</h1>
+        </div>
+        <span class="status completed">Concluído</span>
+      </section>
+
+      @if (erro()) {
+        <div class="inline-message error-message">{{ erro() }}</div>
+      }
+
+      <section class="form-card">
+        <header>
+          <span>Dados do atendimento</span>
+          @if (atendimento.dataConclusao) {
+            <small>Concluído em {{ formatarDataHora(atendimento.dataConclusao) }}</small>
+          }
+        </header>
+
+        <div class="field-grid">
+          <label class="field full read-only">
+            <span>Telefone</span>
+            <input type="text" [value]="atendimento.telefoneCliente || 'Não informado'" readonly />
+          </label>
+
+          <label class="field full read-only">
+            <span>Montador</span>
+            <input type="text" [value]="atendimento.atendente || 'Não informado'" readonly />
+          </label>
+
+          <label class="field read-only">
+            <span>Data</span>
+            <input type="text" [value]="formatarData(atendimento.dataAgendamento)" readonly />
+          </label>
+
+          <label class="field read-only">
+            <span>Horário</span>
+            <input type="text" [value]="formatarHora(atendimento.horaAgendamento)" readonly />
+          </label>
+
+          <label class="field full read-only">
+            <span>Endereço</span>
+            <input type="text" [value]="formatarEndereco(atendimento)" readonly />
+          </label>
+
+          @if (atendimento.observacao) {
+            <label class="field full read-only">
+              <span>Observação</span>
+              <textarea rows="5" [value]="atendimento.observacao" readonly></textarea>
+            </label>
+          }
+        </div>
+      </section>
+
+      <section class="files-card">
+        <header>
+          <div>
+            <span>Fotos e vídeos da visita</span>
+            <small>{{ arquivosVisita().length }} arquivo(s) do agendamento</small>
+          </div>
+        </header>
+
+        <p class="files-description">
+          Registros feitos pelo orçamentista na visita, mostrando o que precisava ser executado.
+        </p>
+
+        <div class="attached-list">
+          @if (carregandoOrigem()) {
+            <div class="empty-files">
+              <ion-spinner name="crescent" />
+              <span>Buscando arquivos do agendamento...</span>
+            </div>
+          } @else if (erroOrigem()) {
+            <div class="empty-files">
+              <ion-icon [icon]="documentOutline" />
+              <span>{{ erroOrigem() }}</span>
+            </div>
+          } @else {
+            @for (arquivo of arquivosVisita(); track arquivo.chave) {
+              <ng-container
+                *ngTemplateOutlet="linhaArquivo; context: { $implicit: arquivo }"
+              />
+            } @empty {
+              <div class="empty-files">
+                <ion-icon [icon]="documentOutline" />
+                <span>Nenhum arquivo no agendamento de origem.</span>
+              </div>
+            }
+          }
+        </div>
+      </section>
+
+      <section class="files-card">
+        <header>
+          <div>
+            <span>Arquivos da obra executada</span>
+            <small>{{ arquivosObra().length }} arquivo(s) do atendimento</small>
+          </div>
+        </header>
+
+        <p class="files-description">Registros feitos pelo montador durante a execução.</p>
+
+        <div class="attached-list">
+          @for (arquivo of arquivosObra(); track arquivo.chave) {
+            <ng-container *ngTemplateOutlet="linhaArquivo; context: { $implicit: arquivo }" />
+          } @empty {
+            <div class="empty-files">
+              <ion-icon [icon]="documentOutline" />
+              <span>Nenhum arquivo da obra executada.</span>
+            </div>
+          }
+        </div>
+      </section>
+    </main>
+  } @else {
+    <div class="page-state error-state">
+      <strong>Não foi possível abrir o atendimento</strong>
+      <p>{{ erro() }}</p>
+    </div>
+  }
+
+  <ng-template #linhaArquivo let-arquivo>
+    <article class="file-row">
+      <span class="file-icon"><ion-icon [icon]="iconeArquivo(arquivo)" /></span>
+      <div class="file-info">
+        <strong>{{ arquivo.nomeOriginal }}</strong>
+        <small>
+          {{ formatarTamanho(arquivo.tamanhoBytes) }} · {{ formatarDataHora(arquivo.dataUpload) }}
+        </small>
+      </div>
+      <div class="file-actions">
+        <button
+          type="button"
+          title="Visualizar"
+          [disabled]="arquivoProcessando() !== null"
+          (click)="visualizar(arquivo)"
+        >
+          @if (arquivoProcessando() === arquivo.chave) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <ion-icon [icon]="eyeOutline" />
+          }
+        </button>
+      </div>
+    </article>
+  </ng-template>
+
+  <ion-modal class="preview-modal" [isOpen]="preview() !== null" (didDismiss)="fecharPreview()">
+    <ng-template>
+      @if (preview(); as conteudo) {
+        <section class="preview-dialog">
+          <header>
+            <div>
+              <span>Visualizar arquivo</span>
+              <strong>{{ conteudo.arquivo.nomeOriginal }}</strong>
+            </div>
+            <button type="button" aria-label="Fechar" (click)="fecharPreview()">&times;</button>
+          </header>
+          <div class="preview-content">
+            @if (ehImagem(conteudo.arquivo)) {
+              <img [src]="conteudo.url" [alt]="conteudo.arquivo.nomeOriginal" />
+            } @else if (ehVideo(conteudo.arquivo)) {
+              <video [src]="conteudo.url" controls playsinline></video>
+            } @else {
+              <ion-icon [icon]="documentOutline" />
+              <p>A visualização deste tipo de arquivo não está disponível no aplicativo.</p>
+            }
+          </div>
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
+</ion-content>

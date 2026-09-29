@@ -17,6 +17,14 @@ export const routes: Routes = [
       import('./features/agendamentos/agendamentos.routes').then((m) => m.AGENDAMENTOS_ROUTES),
   },
   {
+    path: 'atendimentos-finalizados',
+    canActivate: [authGuard, orcamentistaGuard],
+    loadChildren: () =>
+      import('./features/atendimentos-finalizados/atendimentos-finalizados.routes').then(
+        (m) => m.ATENDIMENTOS_FINALIZADOS_ROUTES,
+      ),
+  },
+  {
     path: 'atendimentos',
     canActivate: [authGuard, montadorGuard],
     loadChildren: () =>

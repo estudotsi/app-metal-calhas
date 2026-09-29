@@ -67,6 +67,30 @@
   text-transform: none;
 }
 
+.section-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0 1rem 0.75rem;
+}
+
+.section-nav a {
+  display: grid;
+  place-items: center;
+  min-height: 2.2rem;
+  border-radius: 0.6rem;
+  color: rgb(255 255 255 / 72%);
+  background: rgb(255 255 255 / 8%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.section-nav a.active {
+  color: var(--brand-blue);
+  background: #fff;
+}
+
 .appointments-content {
   --background: #f1f6f8;
 }
