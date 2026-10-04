@@ -29,6 +29,7 @@ import {
   AtendimentoDetalhe,
 } from '../../../atendimentos/models/atendimento';
 import { AtendimentosFinalizadosService } from '../../services/atendimentos-finalizados.service';
+import { ZoomImagemDirective } from '../../../../shared/directives/zoom-imagem.directive';
 
 interface ArquivoExibicao {
   chave: string;
@@ -59,6 +60,7 @@ interface ArquivoPreview {
     IonSpinner,
     IonTitle,
     IonToolbar,
+    ZoomImagemDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

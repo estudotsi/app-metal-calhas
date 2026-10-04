@@ -13,12 +13,18 @@ export class AtendimentosFinalizadosService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/mobile/orcamentista/atendimentos`;
 
-  listar(pageNumber: number, pageSize: number): Observable<AtendimentosFinalizadosPagina> {
-    const params = new HttpParams()
+  listar(
+    pageNumber: number,
+    pageSize: number,
+    nomeCliente?: string,
+  ): Observable<AtendimentosFinalizadosPagina> {
+    let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize)
       .set('sortBy', 'atendimentoid')
       .set('sortDirection', 'desc');
+
+    if (nomeCliente) params = params.set('nomeCliente', nomeCliente);
 
     return this.http.get<AtendimentosFinalizadosPagina>(`${this.baseUrl}/concluidos`, { params });
   }

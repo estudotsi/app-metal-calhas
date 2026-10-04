@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import {
   IonButton,
@@ -12,13 +13,15 @@ import {
 } from '@ionic/angular';
 import {
   calendarOutline,
+  closeOutline,
   constructOutline,
   eyeOutline,
   locationOutline,
   personOutline,
+  searchOutline,
   timeOutline,
 } from 'ionicons/icons';
-import { finalize } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   AtendimentoFinalizado,
@@ -60,15 +63,38 @@ export class ListarAtendimentosFinalizadosPage {
   readonly pagina = signal<AtendimentosFinalizadosPagina>(EMPTY_PAGE);
   readonly carregando = signal(false);
   readonly erro = signal('');
+  readonly busca = signal('');
   readonly calendarOutline = calendarOutline;
+  readonly closeOutline = closeOutline;
   readonly constructOutline = constructOutline;
   readonly eyeOutline = eyeOutline;
   readonly locationOutline = locationOutline;
   readonly personOutline = personOutline;
+  readonly searchOutline = searchOutline;
   readonly timeOutline = timeOutline;
+
+  private readonly busca$ = new Subject<string>();
+
+  constructor() {
+    this.busca$
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => {
+        this.pagina.update((pagina) => ({ ...pagina, pageNumber: 1 }));
+        this.carregar();
+      });
+  }
 
   ionViewWillEnter(): void {
     this.carregar();
+  }
+
+  pesquisar(valor: string): void {
+    this.busca.set(valor);
+    this.busca$.next(valor.trim());
+  }
+
+  limparBusca(): void {
+    this.pesquisar('');
   }
 
   paginaAnterior(): void {
@@ -126,7 +152,7 @@ export class ListarAtendimentosFinalizadosPage {
     this.erro.set('');
 
     this.service
-      .listar(this.pagina().pageNumber, 10)
+      .listar(this.pagina().pageNumber, 10, this.busca().trim())
       .pipe(
         finalize(() => {
           this.carregando.set(false);

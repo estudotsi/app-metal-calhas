@@ -37,6 +37,7 @@ import {
 } from 'ionicons/icons';
 import { finalize } from 'rxjs';
 import { NativeFile } from '../../../../core/native/native-file.plugin';
+import { ZoomImagemDirective } from '../../../../shared/directives/zoom-imagem.directive';
 import { TokenStorageService } from '../../../../core/services/token-storage.service';
 import { environment } from '../../../../../environments/environment';
 import {
@@ -69,6 +70,7 @@ interface ArquivoPreview {
     IonTitle,
     IonToast,
     IonToolbar,
+    ZoomImagemDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

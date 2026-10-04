@@ -11,3 +11,47 @@
   font-weight: 800;
   text-transform: uppercase;
 }
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0 0.85rem;
+  min-height: 2.9rem;
+  border: 1px solid #d7e2e8;
+  border-radius: 0.85rem;
+  background: #fff;
+  color: var(--muted);
+}
+
+.search-field:focus-within {
+  border-color: var(--brand-turquoise);
+}
+
+.search-field ion-icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.search-field input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-field button {
+  display: inline-flex;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}

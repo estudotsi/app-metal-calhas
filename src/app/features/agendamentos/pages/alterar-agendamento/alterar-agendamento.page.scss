@@ -600,6 +600,25 @@ ion-modal.preview-modal {
   font-weight: 800;
 }
 
+.preview-content:has(img[appZoomImagem]) {
+  position: relative;
+  overflow: hidden;
+}
+
+.zoom-hint {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(0 0 0 / 55%);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 ion-modal.confirm-modal {
   --width: calc(100% - 2rem);
   --max-width: 24rem;

@@ -309,7 +309,8 @@
           </header>
           <div class="preview-content">
             @if (ehImagem(conteudo.arquivo.contentType)) {
-              <img [src]="conteudo.url" [alt]="conteudo.arquivo.nomeOriginal" />
+              <img appZoomImagem [src]="conteudo.url" [alt]="conteudo.arquivo.nomeOriginal" />
+              <small class="zoom-hint">Use dois dedos ou toque duas vezes para ampliar</small>
             } @else if (ehVideo(conteudo.arquivo.contentType)) {
               <video [src]="conteudo.url" controls playsinline></video>
             } @else {
